@@ -8,6 +8,19 @@ sudo apt update
 sudo apt install zenoh
 ```
 
+## Zenoh-c のインストール
+
+/usr/local へインストールします。
+
+```
+cd zenoh-c
+mkdir cmake-build
+cd cmake-build
+cmake ..
+cmake --build .. --config Release
+sudo cmake --build . --target install
+```
+
 ## Sample のビルド
 
 ```
