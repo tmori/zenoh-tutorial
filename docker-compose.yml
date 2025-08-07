@@ -1,0 +1,67 @@
+version: "3.8"
+
+networks:
+  local_net_1:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/16
+          gateway: 172.30.0.1
+
+  local_net_2:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.40.0.0/16
+          gateway: 172.40.0.1
+
+
+services:
+  node_a:
+    build:
+      context: ./docker
+    platform: linux/amd64
+    container_name: node_a
+    networks:
+      local_net_1:
+        ipv4_address: 172.30.0.10
+    ports:
+      - "7447:7447"
+      - "7448:7448/udp"
+      - "7449:7449/udp"
+    volumes:
+      - ./sample:/root/workspace/sample
+      - ./zenoh-c:/root/workspace/zenoh-c
+      - ./zenoh-python:/root/workspace/zenoh-python
+    command: ["sleep", "infinity"]
+    restart: unless-stopped
+
+  node_b:
+    build:
+      context: ./docker
+    platform: linux/amd64
+    container_name: node_b
+    networks:
+      local_net_1:
+        ipv4_address: 172.30.0.11
+    volumes:
+      - ./sample:/root/workspace/sample
+      - ./zenoh-c:/root/workspace/zenoh-c
+      - ./zenoh-python:/root/workspace/zenoh-python
+    command: ["sleep", "infinity"]
+    restart: unless-stopped
+
+  node_c:
+    build:
+      context: ./docker
+    platform: linux/amd64
+    container_name: node_c
+    networks:
+      local_net_2:
+        ipv4_address: 172.40.0.10
+    volumes:
+      - ./sample:/root/workspace/sample
+      - ./zenoh-c:/root/workspace/zenoh-c
+      - ./zenoh-python:/root/workspace/zenoh-python
+    command: ["sleep", "infinity"]
+    restart: unless-stopped
