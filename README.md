@@ -20,7 +20,7 @@ bash build.bash
 Zenohd を起動します。
 
 ```
-zenohd -c sample/c-sample/confi.json
+RUST_LOG=trace zenohd -c sample/c-sample/config.json
 ```
 
 Zenoh のsubscriber サンプルを実行します。
