@@ -1,0 +1,18 @@
+{
+  "mode": "peer",
+  "listen": {
+    "endpoints": [
+      "udp/0.0.0.0:7448"
+    ]
+  },
+  "scouting": {
+    "multicast": {
+      "address": "224.0.0.225:7449",
+      "interface": "auto",
+      "ttl": 1
+    },
+    "gossip": {
+      "multihop": false
+    }
+  }
+}
