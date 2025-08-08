@@ -1,24 +1,52 @@
 # zenoh-tutorial
 
+## docker compose のインストール
+
+```
+bash wsl-docker-install.bash
+```
+
+```
+sudo apt install docker-compose
+```
+
+## docker コンテナの起動
+
+```
+bash wsl-docker-activate.bash
+```
+
+```
+docker compose up -d
+```
+成功すると、以下のようにコンテナが起動されていることを確認できます。
+
+```
+NAME      IMAGE                   COMMAND            SERVICE   CREATED         STATUS                     PORTS
+node_a    zenoh-tutorial-node_a   "sleep infinity"   node_a    4 minutes ago   Up 4 minutes (unhealthy)   0.0.0.0:7447->7447/tcp, [::]:7447->7447/tcp, 0.0.0.0:7448-7449->7448-7449/udp, [::]:7448-7449->7448-7449/udp, 8000/tcp
+node_b    zenoh-tutorial-node_b   "sleep infinity"   node_b    4 minutes ago   Up 4 minutes (unhealthy)   7447/tcp, 8000/tcp
+node_c    zenoh-tutorial-node_c   "sleep infinity"   node_c    4 minutes ago   Up 4 minutes (unhealthy)   7447/tcp, 8000/tcp
+```
+
+## docker コンテナへの接続
+
+起動しているコンテナに接続するには、以下のコマンドを実行します。
+```
+docker exec -it <コンテナ名> /bin/bash
+```
+
+例：node_a コンテナに接続する場合
+```
+docker exec -it node_a /bin/bash
+```
+
+
 ## Zenoh のインストール
 
 ```
 echo "deb [trusted=yes] https://download.eclipse.org/zenoh/debian-repo/ /" | sudo tee -a /etc/apt/sources.list.d/zenoh.list > /dev/null
 sudo apt update
 sudo apt install zenoh
-```
-
-## Zenoh-c のインストール
-
-/usr/local へインストールします。
-
-```
-cd zenoh-c
-mkdir cmake-build
-cd cmake-build
-cmake ..
-cmake --build .. --config Release
-sudo cmake --build . --target install
 ```
 
 ## Sample のビルド

@@ -1,5 +1,3 @@
-version: "3.8"
-
 networks:
   local_net_1:
     driver: bridge
