@@ -31,6 +31,7 @@ services:
       - ./sample:/root/workspace/sample
       - ./zenoh-c:/root/workspace/zenoh-c
       - ./zenoh-python:/root/workspace/zenoh-python
+      - ./zenoh-c-install:/root/workspace/zenoh-c-install
     command: ["sleep", "infinity"]
     restart: unless-stopped
 
@@ -46,6 +47,7 @@ services:
       - ./sample:/root/workspace/sample
       - ./zenoh-c:/root/workspace/zenoh-c
       - ./zenoh-python:/root/workspace/zenoh-python
+      - ./zenoh-c-install:/root/workspace/zenoh-c-install
     command: ["sleep", "infinity"]
     restart: unless-stopped
 
@@ -61,5 +63,6 @@ services:
       - ./sample:/root/workspace/sample
       - ./zenoh-c:/root/workspace/zenoh-c
       - ./zenoh-python:/root/workspace/zenoh-python
+      - ./zenoh-c-install:/root/workspace/zenoh-c-install
     command: ["sleep", "infinity"]
     restart: unless-stopped

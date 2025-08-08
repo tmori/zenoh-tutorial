@@ -7,5 +7,6 @@ else
 	mkdir cmake-build
 fi
 cd cmake-build
-cmake  -DCMAKE_PREFIX_PATH=../../../build/install ..
+
+cmake -DZENOH_C_LIBRARY=../../../zenoh-c-install/lib/libzenohc.so ..
 make

@@ -19,7 +19,21 @@ bash wsl-docker-activate.bash
 ```
 docker compose up -d
 ```
-成功すると、以下のようにコンテナが起動されていることを確認できます。
+成功すると、以下のメッセージが表示されます。
+
+```
+[+] Running 8/8
+ ✔ zenoh-tutorial-node_a               Built                                                                                                       0.0s 
+ ✔ zenoh-tutorial-node_b               Built                                                                                                       0.0s 
+ ✔ zenoh-tutorial-node_c               Built                                                                                                       0.0s 
+ ✔ Network zenoh-tutorial_local_net_1  Created                                                                                                     0.2s 
+ ✔ Network zenoh-tutorial_local_net_2  Created                                                                                                     0.0s 
+ ✔ Container node_c                    Started                                                                                                     0.3s 
+ ✔ Container node_b                    Started                                                                                                     0.4s 
+ ✔ Container node_a                    Started     
+```
+
+また、以下のようにコンテナが起動されていることを確認できます。
 
 ```
 NAME      IMAGE                   COMMAND            SERVICE   CREATED         STATUS                     PORTS
@@ -40,13 +54,28 @@ docker exec -it <コンテナ名> /bin/bash
 docker exec -it node_a /bin/bash
 ```
 
-
-## Zenoh のインストール
+## docker コンテナの停止
 
 ```
-echo "deb [trusted=yes] https://download.eclipse.org/zenoh/debian-repo/ /" | sudo tee -a /etc/apt/sources.list.d/zenoh.list > /dev/null
-sudo apt update
-sudo apt install zenoh
+docker compose down
+```
+
+## docker コンテナの削除
+
+```
+docker compose down --rmi all
+```
+
+## Zenoh-c のインストール
+Zenoh-c をインストールするには、以下の手順を実行します。
+
+```
+cd zenoh-c
+mkdir -p build
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=/root/workspace/zenoh-c-install
+cmake --build . --config Release
+cmake --build . --target install
 ```
 
 ## Sample のビルド
@@ -180,3 +209,11 @@ ttl: 32 → より広いネットワーク範囲で発見
 - **ファイアウォール**: UDP 7448, 7449ポートの開放が必要
 - **マルチキャスト対応**: ネットワーク機器がマルチキャストをサポートしている必要
 - **TTL設定**: ネットワーク構成に応じた適切な値の設定
+
+## Zenoh のインストール(nativeでインストールする場合)
+
+```
+echo "deb [trusted=yes] https://download.eclipse.org/zenoh/debian-repo/ /" | sudo tee -a /etc/apt/sources.list.d/zenoh.list > /dev/null
+sudo apt update
+sudo apt install zenoh
+```

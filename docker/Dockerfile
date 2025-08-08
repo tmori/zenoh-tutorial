@@ -3,10 +3,11 @@ FROM ubuntu:24.04
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-# 1) 基本ツール + GPG
+# 1) 基本ツール + GPG + ビルドツール
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates curl gnupg \
     iproute2 iputils-ping netcat-openbsd \
+    build-essential cmake \
  && rm -rf /var/lib/apt/lists/*
 
 # 2) zenoh 公式APTレポジトリを署名付きで登録
@@ -23,4 +24,5 @@ EXPOSE 7447 8000
 HEALTHCHECK --interval=10s --timeout=3s --start-period=3s --retries=5 \
   CMD curl -sf http://127.0.0.1:8000/ || exit 1
 
-  
+RUN mkdir -p /root/workspace
+WORKDIR /root/workspace

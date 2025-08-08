@@ -18,6 +18,7 @@ target_link_libraries(
 target_include_directories(
     pub 
     PRIVATE /usr/local/include
+    PRIVATE ../../zenoh-c-install/include/
 )
 
 add_executable(sub sub.c)
@@ -25,4 +26,5 @@ target_link_libraries(sub ${ZENOH_C_LIBRARY})
 target_include_directories(
     sub 
     PRIVATE /usr/local/include
+    PRIVATE ../../zenoh-c-install/include/
 )
