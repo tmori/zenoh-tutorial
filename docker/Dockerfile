@@ -10,7 +10,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential cmake iproute2 net-tools tcpdump \
  && rm -rf /var/lib/apt/lists/*
 
-# 2) zenoh 公式APTレポジトリを署名付きで登録
+
+# rustup + stable toolchain
+RUN curl -fsSL https://sh.rustup.rs | sh -s -- -y \
+ && /root/.cargo/bin/rustup default stable
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+# （任意）zenohd を APT で
 RUN install -d -m 0755 /etc/apt/keyrings && \
     curl -fsSL https://download.eclipse.org/zenoh/debian-repo/zenoh-public-key \
       | gpg --dearmor --yes -o /etc/apt/keyrings/zenoh-public-key.gpg && \
