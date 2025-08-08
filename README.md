@@ -1,20 +1,22 @@
 # zenoh-tutorial
 
-## docker compose のインストール
+## 前提とする環境
+
+- Windows 10 または Windows 11
+- WSL2 (Windows Subsystem for Linux 2)
+- Ubuntu 24.04 LTS (WSL2)
+- [Docker Desktop for Windows](https://www.docker.com/get-started/)
+
+
+## インストール手順
+
+WSL2を起動して、git cloneします。
 
 ```
-bash wsl-docker-install.bash
+git clone –recursive https://github.com/tmori/zenoh-tutorial.git
 ```
 
-```
-sudo apt install docker-compose
-```
-
-## docker コンテナの起動
-
-```
-bash wsl-docker-activate.bash
-```
+## docker イメージ作成します
 
 ```
 docker compose up -d
@@ -36,10 +38,11 @@ docker compose up -d
 また、以下のようにコンテナが起動されていることを確認できます。
 
 ```
-NAME      IMAGE                   COMMAND            SERVICE   CREATED         STATUS                     PORTS
-node_a    zenoh-tutorial-node_a   "sleep infinity"   node_a    4 minutes ago   Up 4 minutes (unhealthy)   0.0.0.0:7447->7447/tcp, [::]:7447->7447/tcp, 0.0.0.0:7448-7449->7448-7449/udp, [::]:7448-7449->7448-7449/udp, 8000/tcp
-node_b    zenoh-tutorial-node_b   "sleep infinity"   node_b    4 minutes ago   Up 4 minutes (unhealthy)   7447/tcp, 8000/tcp
-node_c    zenoh-tutorial-node_c   "sleep infinity"   node_c    4 minutes ago   Up 4 minutes (unhealthy)   7447/tcp, 8000/tcp
+NAME                IMAGE                   COMMAND                   SERVICE             CREATED             STATUS                      PORTS
+node_a              zenoh-tutorial-node_a   "sh -c '\n  for i in …"   node_a              50 minutes ago      Up 50 minutes (unhealthy)   7447/tcp, 8000/tcp
+node_b              zenoh-tutorial-node_b   "sh -c '\n  for i in …"   node_b              50 minutes ago      Up 50 minutes (unhealthy)   7447/tcp, 8000/tcp
+node_c              zenoh-tutorial-node_c   "sh -c '\n  for i in …"   node_c              50 minutes ago      Up 50 minutes (unhealthy)   7447/tcp, 8000/tcp
+node_r              alpine:3.20             "sh -c '\n  apk add -…"   node_r              50 minutes ago      Up 50 minutes (healthy)  
 ```
 
 ## docker コンテナへの接続
