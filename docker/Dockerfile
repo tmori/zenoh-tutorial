@@ -7,7 +7,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates curl gnupg \
     iproute2 iputils-ping netcat-openbsd \
-    build-essential cmake \
+    build-essential cmake iproute2 net-tools \
  && rm -rf /var/lib/apt/lists/*
 
 # 2) zenoh 公式APTレポジトリを署名付きで登録

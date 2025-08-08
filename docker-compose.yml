@@ -5,7 +5,6 @@ networks:
       config:
         - subnet: 172.30.0.0/16
           gateway: 172.30.0.1
-
   local_net_2:
     driver: bridge
     ipam:
@@ -13,26 +12,66 @@ networks:
         - subnet: 172.40.0.0/16
           gateway: 172.40.0.1
 
-
 services:
+  # L3ルータ（≒L3スイッチのL3部分）
+  node_r:
+    image: alpine:3.20
+    container_name: node_r
+    cap_add: [ "NET_ADMIN" ]
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv4.conf.all.rp_filter=0
+      - net.ipv4.conf.default.rp_filter=0
+    networks:
+      local_net_1:
+        ipv4_address: 172.30.0.254
+      local_net_2:
+        ipv4_address: 172.40.0.254
+    command: >
+      sh -c "
+        apk add --no-cache iproute2 iptables tcpdump;
+        echo 0 > /proc/sys/net/ipv4/conf/all/rp_filter;
+        echo 0 > /proc/sys/net/ipv4/conf/default/rp_filter;
+        echo 0 > /proc/sys/net/ipv4/conf/eth0/rp_filter;
+        echo 0 > /proc/sys/net/ipv4/conf/eth1/rp_filter;
+        iptables -P FORWARD ACCEPT;
+        iptables -F FORWARD;
+        iptables -A FORWARD -j ACCEPT;
+        sleep infinity
+      "
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "sh", "-c", "ip a >/dev/null"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
+      start_period: 1s
+
   node_a:
     build:
       context: ./docker
     platform: linux/amd64
     container_name: node_a
+    cap_add: [ "NET_ADMIN" ]
     networks:
       local_net_1:
         ipv4_address: 172.30.0.10
-    ports:
-      - "7447:7447"
-      - "7448:7448/udp"
-      - "7449:7449/udp"
+    depends_on:
+      node_r:
+        condition: service_healthy
+    command: >
+      sh -c "
+        for i in $(seq 1 20); do ping -c1 -W1 172.30.0.254 && break; sleep 1; done;
+        ip route replace 172.40.0.0/16 via 172.30.0.254;
+        echo 'route to 172.40.0.0/16 via 172.30.0.254 set';
+        ip route;
+        sleep infinity
+      "
     volumes:
       - ./sample:/root/workspace/sample
       - ./zenoh-c:/root/workspace/zenoh-c
       - ./zenoh-python:/root/workspace/zenoh-python
       - ./zenoh-c-install:/root/workspace/zenoh-c-install
-    command: ["sleep", "infinity"]
     restart: unless-stopped
 
   node_b:
@@ -40,15 +79,25 @@ services:
       context: ./docker
     platform: linux/amd64
     container_name: node_b
+    cap_add: [ "NET_ADMIN" ]
     networks:
       local_net_1:
         ipv4_address: 172.30.0.11
+    depends_on:
+      node_r:
+        condition: service_healthy
+    command: >
+      sh -c "
+        for i in $(seq 1 20); do ping -c1 -W1 172.30.0.254 && break; sleep 1; done;
+        ip route replace 172.40.0.0/16 via 172.30.0.254;
+        echo 'route to 172.40.0.0/16 via 172.30.0.254 set';
+        sleep infinity
+      "
     volumes:
       - ./sample:/root/workspace/sample
       - ./zenoh-c:/root/workspace/zenoh-c
       - ./zenoh-python:/root/workspace/zenoh-python
       - ./zenoh-c-install:/root/workspace/zenoh-c-install
-    command: ["sleep", "infinity"]
     restart: unless-stopped
 
   node_c:
@@ -56,13 +105,24 @@ services:
       context: ./docker
     platform: linux/amd64
     container_name: node_c
+    cap_add: [ "NET_ADMIN" ]
     networks:
       local_net_2:
         ipv4_address: 172.40.0.10
+    depends_on:
+      node_r:
+        condition: service_healthy
+    command: >
+      sh -c "
+        for i in $(seq 1 20); do ping -c1 -W1 172.40.0.254 && break; sleep 1; done;
+        ip route replace 172.30.0.0/16 via 172.40.0.254;
+        echo 'route to 172.30.0.0/16 via 172.40.0.254 set';
+        ip route;
+        sleep infinity
+      "
     volumes:
       - ./sample:/root/workspace/sample
       - ./zenoh-c:/root/workspace/zenoh-c
       - ./zenoh-python:/root/workspace/zenoh-python
       - ./zenoh-c-install:/root/workspace/zenoh-c-install
-    command: ["sleep", "infinity"]
     restart: unless-stopped
