@@ -1,0 +1,17 @@
+{
+  "mode": "peer", 
+  "listen": {
+    "endpoints": [
+      "udp/172.30.0.11:7446"
+    ]
+  },
+  "scouting": {
+    "multicast": {
+      "enabled": false,
+      "address": "224.0.0.224:7446",
+      "interface": "auto",
+      "autoconnect": { "router": [], "peer": ["router", "peer"] },
+      "listen": true
+    }
+  }
+}
