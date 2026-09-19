@@ -122,3 +122,10 @@ docker compose -f docker-compose.yml -f docker-compose.mac.yml down
 以上でZenoh Cチュートリアルの基本編は完了です。
 
 引き続き新しいネットワーク階層化機能を試す場合は、[05 Regionsによるネットワークの階層化（発展）](05-region.md)へ進みます。
+
+## Zenoh公式資料
+
+- [Deployment](https://zenoh.io/docs/getting-started/deployment/): Client、Peer、Routerの役割とRouterを使った構成
+- [For a quick test using Docker](https://zenoh.io/docs/getting-started/quick-test/): Dockerでマルチキャストを利用できない場合の明示的なRouter接続
+- [Abstractions](https://zenoh.io/docs/manual/abstractions/): Key Expressionに基づくPublisher／Subscriberの対応
+- [Configuration](https://zenoh.io/docs/manual/configuration/): `zenohd` の設定ファイルとコマンドライン設定

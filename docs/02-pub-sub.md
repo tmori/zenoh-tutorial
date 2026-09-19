@@ -95,4 +95,12 @@ cd /root/workspace
 
 設定ファイルは [`sample/c-sample`](../sample/c-sample/) にあります。
 
+## Zenoh公式資料
+
+- [Your first Zenoh app](https://zenoh.io/docs/getting-started/first-app/): PublisherとSubscriberによるPub/Subの基本
+- [Abstractions](https://zenoh.io/docs/manual/abstractions/): Key、Key Expression、Publisher、Subscriberの定義
+- [Deployment](https://zenoh.io/docs/getting-started/deployment/): Peer modeとマルチキャストScoutingの動作
+- [Configuration](https://zenoh.io/docs/manual/configuration/): JSON5／YAML設定ファイルと設定項目の指定方法
+- [Protocol Specification: Scouting](https://spec.zenoh.io/spec/1.0.0/scouting/): Scoutingによる発見とSession確立の関係
+
 次は[03 同一ネットワーク内の通信](03-network.md)へ進みます。

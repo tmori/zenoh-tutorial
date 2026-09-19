@@ -208,7 +208,8 @@ cd /root/workspace
 - 複数Gatewayで同じRegion境界を構成する場合、分類規則の整合性を運用側で管理する必要があります
 - Routed RegionをSouthに配置できるのは、North側もRouted Regionの場合です
 
-## 参考資料
+## Zenoh公式資料
 
-- [Zenoh documentation: Deployment](https://zenoh.io/docs/getting-started/deployment/)
-- [Zenoh 1.9.x: Longwang](https://zenoh.io/blog/2026-04-16-zenoh-longwang/)
+- [Deployment](https://zenoh.io/docs/getting-started/deployment/): Regions、Gateway、North／South分類、階層構造と制約
+- [Configuration](https://zenoh.io/docs/manual/configuration/): JSON5設定ファイルと `--cfg` による設定方法
+- [Zenoh 1.9.x: Longwang](https://zenoh.io/blog/2026-04-16-zenoh-longwang/): Regions導入の背景、`region_name`、`gateway.south` と `"auto"` の説明

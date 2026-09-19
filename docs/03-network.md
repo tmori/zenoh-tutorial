@@ -79,4 +79,11 @@ cd /root/workspace
 
 受信できることを確認し、両方の端末で `Ctrl-C` を押します。
 
+## Zenoh公式資料
+
+- [Deployment](https://zenoh.io/docs/getting-started/deployment/): Peer、Client、Routerの通信モデルと明示的なEndpoint接続
+- [Configuration](https://zenoh.io/docs/manual/configuration/): `connect`、`listen`を含むZenoh設定の扱い
+- [Protocol Specification: Scouting](https://spec.zenoh.io/spec/1.0.0/scouting/): UDPマルチキャストによるScoutingの仕様
+- [Protocol Specification: Links](https://spec.zenoh.io/spec/1.0.0/transport/links.html): TCP、UDP Unicast、UDP Multicastのリンク特性
+
 次は[04 Zenoh Routerを介した通信](04-router.md)へ進みます。

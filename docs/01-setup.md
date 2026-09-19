@@ -132,4 +132,10 @@ exit
 
 `sample` と `zenoh-c-install` は全ノードで共有されているため、ビルドは1回だけで構いません。
 
+## Zenoh公式資料
+
+- [Installation](https://zenoh.io/docs/getting-started/installation/): Zenohクライアントライブラリと `zenohd` の公式インストール案内
+- [C API](https://zenoh.io/docs/apis/c/): Zenoh C APIの公式入口
+- [For a quick test using Docker](https://zenoh.io/docs/getting-started/quick-test/): Docker上でZenohを動かす公式手順と注意点
+
 次は[02 同一コンテナ内のPub/Sub](02-pub-sub.md)へ進みます。

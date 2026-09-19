@@ -21,6 +21,23 @@ PDFからではなく、各ページのコードブロックからコピーし�
 
 番号順に進めてください。各ページは、直前のページまで完了していることを前提にしています。
 
+## Zenoh公式資料との対応
+
+このチュートリアルの説明は、次のZenoh公式資料を根拠にしています。各章末にも、その章に対応するリンクを掲載しています。
+
+| 内容 | Zenoh公式資料 |
+| --- | --- |
+| Zenohとzenohdのインストール | [Installation](https://zenoh.io/docs/getting-started/installation/) |
+| C言語API | [C API](https://zenoh.io/docs/apis/c/) |
+| Pub/Subの基本 | [Your first Zenoh app](https://zenoh.io/docs/getting-started/first-app/) |
+| Key、Key Expression、Publisher、Subscriber | [Abstractions](https://zenoh.io/docs/manual/abstractions/) |
+| Peer、Client、Router、Scouting、Regions | [Deployment](https://zenoh.io/docs/getting-started/deployment/) |
+| JSON5設定ファイルと `--cfg` | [Configuration](https://zenoh.io/docs/manual/configuration/) |
+| Docker環境でのZenoh | [For a quick test using Docker](https://zenoh.io/docs/getting-started/quick-test/) |
+| ZenohプロトコルのScouting | [Protocol Specification: Scouting](https://spec.zenoh.io/spec/1.0.0/scouting/) |
+| TCP／UDPなどのリンク | [Protocol Specification: Links](https://spec.zenoh.io/spec/1.0.0/transport/links.html) |
+| Regions導入の背景 | [Zenoh 1.9.x: Longwang](https://zenoh.io/blog/2026-04-16-zenoh-longwang/) |
+
 ## 表記
 
 「ホスト」は、リポジトリをcloneしたWSL2/UbuntuまたはMacのターミナルです。
