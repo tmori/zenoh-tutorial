@@ -1,0 +1,23 @@
+{
+  mode: "peer",
+  region_name: "classroom-north",
+  listen: {
+    endpoints: ["tcp/172.30.0.10:7446"],
+  },
+  scouting: {
+    multicast: {
+      enabled: false,
+    },
+  },
+  gateway: {
+    south: [
+      {
+        filters: [
+          {
+            region_names: ["classroom-south"],
+          },
+        ],
+      },
+    ],
+  },
+}

@@ -119,4 +119,6 @@ Apple Silicon Mac:
 docker compose -f docker-compose.yml -f docker-compose.mac.yml down
 ```
 
-以上でZenoh Cチュートリアルは完了です。
+以上でZenoh Cチュートリアルの基本編は完了です。
+
+引き続き新しいネットワーク階層化機能を試す場合は、[05 Regionsによるネットワークの階層化（発展）](05-region.md)へ進みます。
