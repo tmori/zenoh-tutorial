@@ -86,16 +86,19 @@ cd /root/workspace
 
 確認後、Publisher、Subscriber、Zenoh Routerの順に、それぞれの端末で `Ctrl-C` を押します。
 
-## 3. Routerが必要なことを確認する
+## 3. RouterをEntry Pointとして利用する意味を確認する
 
-Zenoh Routerを停止した状態で、同じコマンドから `pub` と `sub` だけを実行すると、異なるネットワーク間ではデータを交換できません。
+Zenoh Routerを停止した状態で、同じclient設定のまま `pub` と `sub` だけを実行すると、データを交換できません。両方のclientが接続先として指定している `172.40.0.10:7446` のZenoh Routerが存在しないためです。
 
-これは次の2点によるものです。
+一方、`node_a`／`node_b` と `node_c` はIPユニキャストでは到達できます。そのため、Peer同士で `connect` と `listen` のEndpointを明示すれば、Zenoh Routerを使わずに通信することもできます。
 
-1. `node_a`と`node_c`はIPユニキャストでは到達できる
-2. Zenohのマルチキャスト探索はDockerネットワークを越えない
+この演習でZenoh Routerを利用する目的は、Routerを共有のEntry Pointにすることです。
 
-Zenoh Routerへ双方が接続することで、ネットワーク境界を越えてkey expressionに基づくデータ配送が行われます。
+- マルチキャスト探索が届かないネットワークのノードに、既知の接続先を提供する
+- 各clientが相互のEndpointを知らなくても、同じRouterへ接続すれば通信できる
+- Routerがkey expressionに基づいてPublisherとSubscriberの間を中継する
+
+したがって、Zenoh RouterはIPユニキャストで到達可能なノード間通信に常に必須なのではなく、この構成における接続と中継の基点です。
 
 ## 4. チュートリアルの終了
 

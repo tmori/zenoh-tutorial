@@ -6,7 +6,7 @@
 
 ## 1. この演習で確認すること
 
-Regionsでは、Zenohネットワークを親子関係のある論理的な単位へ分割できます。Region内部では、これまでと同じClient、Peer、Routerを使用します。
+Regionsでは、Zenohネットワークを親子関係のある論理的な単位へ分割できます。各Regionは、従来からあるPeer-to-Peer、Brokered、Routedのいずれかの通信モデルで構成され、それぞれ `peer`、`client`、`router` modeを使用します。
 
 Regionの階層は木構造です。
 
@@ -57,7 +57,9 @@ South Region  互換であるか
 
 ### region_nameについて
 
-`region_name` は任意の分類用属性です。グローバルに登録されたRegion IDでも、North所属を保証する値でもありません。
+`region_name` は、そのZenohノードのNorth Regionを識別するための任意の名前です。接続先のGatewayは、この値を `gateway.south` の分類条件として利用できます。
+
+ただし、`region_name` はグローバルに登録されるRegion IDではなく、Gateway自身の `region_name` と自動的に比較されるものでもありません。最終的なNorth／Southの分類は、Gatewayの `gateway.south` フィルターとmodeの互換性によって決まります。
 
 この演習では、次のように使用します。
 
@@ -212,4 +214,5 @@ cd /root/workspace
 
 - [Deployment](https://zenoh.io/docs/getting-started/deployment/): Regions、Gateway、North／South分類、階層構造と制約
 - [Configuration](https://zenoh.io/docs/manual/configuration/): JSON5設定ファイルと `--cfg` による設定方法
+- [Zenoh 1.10.1 DEFAULT_CONFIG.json5](https://github.com/eclipse-zenoh/zenoh/blob/1.10.1/DEFAULT_CONFIG.json5): `region_name` と `gateway.south` の公式設定スキーマ
 - [Zenoh 1.9.x: Longwang](https://zenoh.io/blog/2026-04-16-zenoh-longwang/): Regions導入の背景、`region_name`、`gateway.south` と `"auto"` の説明
