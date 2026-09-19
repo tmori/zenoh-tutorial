@@ -90,11 +90,11 @@ cd /root/workspace
 
 Peer同士を直接接続する構成と、ClientがRouterを介して通信する構成では、ネットワークの作り方が異なります。
 
-[Zenoh公式Deployment資料](https://zenoh.io/docs/getting-started/deployment/)では、Peer-to-Peer RegionをPeer同士が直接接続するclique、Brokered RegionをClientが中継ノードへ接続する構成として説明しています。
+[Zenoh公式Deployment資料](https://zenoh.io/docs/getting-started/deployment/)では、Peer-to-Peer RegionをPeer同士が直接接続する完全メッシュ（clique）、Brokered RegionをClientが中継ノードへ接続する構成として説明しています。
 
 ### Peer同士を直接接続する構成
 
-Peer-to-Peer Regionでは、Peer同士が直接sessionを確立するcliqueを構成します。
+Peer-to-Peer Regionでは、すべてのPeerが互いに直接sessionを確立する完全メッシュ（clique）を構成します。
 
 ```text
 Peer A -------- Peer B
@@ -102,6 +102,8 @@ Peer A -------- Peer B
     \            /
        Peer C
 ```
+
+cliqueとは、すべてのノード間に直接接続がある構成です。本資料では、以降「完全メッシュ」と呼びます。
 
 PublisherとSubscriberが直接接続されている場合、データはRouterを経由しません。
 
@@ -115,7 +117,7 @@ Subscriber Peer
 
 同じ通信条件で1つの経路だけを比較すれば、Routerによる追加の中継処理がないため、直接Peerの方が一般に経路を短くできます。
 
-一方、Peer数を `N` とすると、完全なcliqueで必要になるPeer間session数は次のように増加します。
+一方、Peer数を `N` とすると、完全メッシュで必要になるPeer間session数は次のように増加します。
 
 ```text
 N * (N - 1) / 2
