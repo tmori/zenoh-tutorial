@@ -1,0 +1,9 @@
+services:
+  node_a:
+    platform: linux/arm64
+
+  node_b:
+    platform: linux/arm64
+
+  node_c:
+    platform: linux/arm64

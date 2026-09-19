@@ -1,0 +1,98 @@
+# 02 同一コンテナ内のPub/Sub
+
+この章では、`node_b`内でPublisherとSubscriberを動かします。2つの端末を使用します。
+
+サンプルの既定値は次のとおりです。
+
+- Publisherのkey expression: `demo/example/zenoh-c-pub`
+- Subscriberのkey expression: `demo/example/**`
+- payload: 1秒ごとに送られる文字列
+
+Subscriberの `demo/example/**` は、Publisherの `demo/example/zenoh-c-pub` に一致します。
+
+## 1. マルチキャスト探索を使う通信
+
+### Subscriberの起動
+
+端末Aで実行します。
+
+```bash
+docker exec -it node_b bash
+```
+
+```bash
+cd /root/workspace
+./sample/c-sample/cmake-build/sub -c sample/c-sample/config-multicast.json
+```
+
+### Publisherの起動
+
+端末Bで実行します。
+
+```bash
+docker exec -it node_b bash
+```
+
+```bash
+cd /root/workspace
+./sample/c-sample/cmake-build/pub -c sample/c-sample/config-multicast.json
+```
+
+端末Aに次のような受信結果が繰り返し表示されれば成功です。
+
+```text
+>> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   0] Pub from C!')
+```
+
+両方の端末で `Ctrl-C` を押して終了します。
+
+### マルチキャストを無効にした場合
+
+同じ手順で、両方の設定ファイルを `config-no-multicast.json` に変えて起動します。
+
+端末A:
+
+```bash
+cd /root/workspace
+./sample/c-sample/cmake-build/sub -c sample/c-sample/config-no-multicast.json
+```
+
+端末B:
+
+```bash
+cd /root/workspace
+./sample/c-sample/cmake-build/pub -c sample/c-sample/config-no-multicast.json
+```
+
+明示的な接続先もなく、マルチキャスト探索も無効なため、Subscriberにはデータが届きません。確認後、両方の端末で `Ctrl-C` を押します。
+
+## 2. UDPエンドポイントを明示する通信
+
+この演習では、Subscriberが `172.30.0.11:7446` で待ち受け、Publisherがそこへ接続します。
+
+端末AでSubscriberを先に起動します。
+
+```bash
+cd /root/workspace
+./sample/c-sample/cmake-build/sub -c sample/c-sample/config-udp-listener.json
+```
+
+端末BでPublisherを起動します。
+
+```bash
+cd /root/workspace
+./sample/c-sample/cmake-build/pub -c sample/c-sample/config-udp-connector.json
+```
+
+端末Aに受信結果が表示されれば成功です。確認後、両方の端末で `Ctrl-C` を押します。
+
+## 設定ファイルのポイント
+
+- `config-multicast.json`: マルチキャスト探索を有効にする
+- `config-no-multicast.json`: マルチキャスト探索を無効にする
+- `config-udp-listener.json`: UDPエンドポイントで待ち受ける
+- `config-udp-connector.json`: UDPエンドポイントへ接続する
+
+設定ファイルは [`sample/c-sample`](../sample/c-sample/) にあります。
+
+次は[03 同一ネットワーク内の通信](03-network.md)へ進みます。

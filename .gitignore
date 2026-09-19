@@ -30,3 +30,13 @@
 *.exe
 *.out
 *.app
+
+# OS and editor files
+.DS_Store
+.vscode/
+
+# Local build outputs
+/build/
+/sample/c-sample/cmake-build/
+/zenoh-c-install/*
+!/zenoh-c-install/.gitkeep

@@ -1,5 +1,7 @@
 # zenoh-tutorial
 
+講義の演習手順とコピー可能なコマンドは、[docs/README.md](docs/README.md)を参照してください。
+
 ## 前提とする環境
 
 - Windows 10 または Windows 11
@@ -13,7 +15,7 @@
 WSL2を起動して、git cloneします。
 
 ```
-git clone –recursive https://github.com/tmori/zenoh-tutorial.git
+git clone --recursive https://github.com/tmori/zenoh-tutorial.git
 ```
 
 ## docker イメージ作成します
@@ -21,6 +23,24 @@ git clone –recursive https://github.com/tmori/zenoh-tutorial.git
 ```
 docker compose up -d
 ```
+
+### Apple Silicon Macで環境を準備する場合
+
+講義参加者向けの既定構成は `linux/amd64` のままです。Apple Silicon Macで
+ローカル確認を行う場合は、arm64用のComposeオーバーライドを追加して起動します。
+
+```
+docker compose --parallel 1 -f docker-compose.yml -f docker-compose.mac.yml up -d --build
+```
+
+`--parallel 1` は、Docker Desktopで `node_r` を2つのネットワークへ確実に接続するため、コンテナを直列に作成する指定です。
+
+停止する場合も同じComposeファイルを指定します。
+
+```
+docker compose -f docker-compose.yml -f docker-compose.mac.yml down
+```
+
 成功すると、以下のメッセージが表示されます。
 
 ```
