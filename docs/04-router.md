@@ -92,6 +92,22 @@ Peer同士を直接接続する構成と、ClientがRouterを介して通信す�
 
 [Zenoh公式Deployment資料](https://zenoh.io/docs/getting-started/deployment/)では、Peer-to-Peer RegionをPeer同士が直接接続する完全メッシュ（clique）、Brokered RegionをClientが中継ノードへ接続する構成として説明しています。
 
+ここで重要なのは、`peer`と`client`の違いが単なる役割名ではなく、形成するネットワークトポロジの選択だという点です。
+
+```text
+peer mode
+  発見したPeerへ自動接続
+    -> Peer同士の完全メッシュ
+    -> Peer数に応じてsession数が増加
+
+client mode
+  接続先をscoutingで発見、またはEndpointで指定
+    -> ある時点では1つのZenohノードとsessionを維持
+    -> 共通の接続先を使うスター型へ集約可能
+```
+
+Clientが選択するのは、自分がsessionを確立する接続先です。PublisherとSubscriberの組み合わせを指定するわけではなく、データの配送先はkey expressionに基づいて決まります。また、Clientの接続先はRouterに限定されませんが、多数のClientを共通のRouterへ接続すると、典型的なBrokered構成になります。
+
 ### Peer同士を直接接続する構成
 
 Peer-to-Peer Regionでは、すべてのPeerが互いに直接sessionを確立する完全メッシュ（clique）を構成します。
@@ -165,7 +181,7 @@ Subscriber Client
 | 観点 | Peer直結 | Router経由 |
 | --- | --- | --- |
 | 1つの通信経路 | 直接送信できる | Routerで1回中継する |
-| アプリケーションが持つsession | Peer数に応じて増える | Clientは基本的に1つの接続先を持つ |
+| アプリケーションが持つsession | Peer数に応じて増える | Clientはある時点で1つのsessionを維持する |
 | 接続先の把握 | Peer同士が相互に接続する | Clientは共通のEntry Pointへ接続する |
 | トポロジ管理 | 小規模構成に向く | ノード数の多い構成を集約しやすい |
 | 主な目的 | 短いデータ経路 | 接続数、状態管理、スケーラビリティ |
