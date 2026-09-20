@@ -3,6 +3,18 @@
 このディレクトリには、講義資料の演習で入力するコマンドをまとめています。
 PDFからではなく、各ページのコードブロックからコピーしてください。
 
+ホスト側では、講義用のディレクトリを次の構成にします。
+
+```text
+workspace/
+├── zenoh-tutorial/
+└── hakoniwa-business-pack/
+```
+
+Composeコマンドは、特に記載がない限り
+`workspace/zenoh-tutorial` で実行します。`hakoniwa-business-pack` は
+ブラウザで接続Topologyを確認するオプション演習で使用します。
+
 この手順では、次のことを順番に確認します。
 
 1. Docker環境と `zenoh-c` 1.10.1を準備する
@@ -10,6 +22,7 @@ PDFからではなく、各ページのコードブロックからコピーし�
 3. 同じネットワーク上の2つのコンテナで通信する
 4. Zenoh Routerを使って異なるネットワーク間で通信する
 5. 発展演習としてRegionsによる階層化を確認する
+6. オプション演習として接続Topologyをブラウザで確認する
 
 ## チュートリアルの進め方
 
@@ -18,6 +31,7 @@ PDFからではなく、各ページのコードブロックからコピーし�
 - [03 同一ネットワーク内の通信](03-network.md)
 - [04 Zenoh Routerを介した通信](04-router.md)
 - [05 Regionsによるネットワークの階層化（発展）](05-region.md)
+- [06 ブラウザでZenoh接続Topologyを確認する（オプション）](06-viewer-setup.md)
 
 番号順に進めてください。各ページは、直前のページまで完了していることを前提にしています。
 
@@ -47,7 +61,7 @@ PDFからではなく、各ページのコードブロックからコピーし�
 
 ## 終了方法
 
-WSL2/Ubuntuでは、ホストのリポジトリ直下で次を実行します。
+WSL2/Ubuntuでは、ホストの `workspace/zenoh-tutorial` で次を実行します。
 
 ```bash
 docker compose down

@@ -212,7 +212,7 @@ Zenoh Routerを停止した状態で、同じclient設定のまま `pub` と `su
 exit
 ```
 
-ホストのリポジトリ直下でDocker環境を停止します。
+ホストの `workspace/zenoh-tutorial` でDocker環境を停止します。
 
 WSL2/Ubuntu:
 

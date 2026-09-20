@@ -4,12 +4,26 @@
 
 ## 1. リポジトリの取得
 
-ホストで実行します。
+ホストで講義用の `workspace` を作成し、その直下にチュートリアルと
+Hakoniwa Business Packを配置します。
 
 ```bash
+mkdir -p workspace
+cd workspace
 git clone --recursive https://github.com/tmori/zenoh-tutorial.git
+git clone https://github.com/hakoniwalab/hakoniwa-business-pack.git
 cd zenoh-tutorial
 ```
+
+```text
+workspace/
+├── zenoh-tutorial/
+└── hakoniwa-business-pack/
+```
+
+通常のZenoh演習では `hakoniwa-business-pack` を使用しません。
+[06 ブラウザでZenoh接続Topologyを確認する（オプション）](06-viewer-setup.md)
+を実施するときに使用します。
 
 すでに通常の `git clone` を実行済みの場合は、次のコマンドでsubmoduleを取得できます。
 
@@ -21,7 +35,7 @@ git submodule update --init --recursive
 
 ### WSL2/Ubuntu
 
-ホストのリポジトリ直下で実行します。
+ホストの `workspace/zenoh-tutorial` で実行します。
 
 ```bash
 docker compose up -d

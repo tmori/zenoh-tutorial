@@ -12,11 +12,25 @@
 
 ## インストール手順
 
-WSL2を起動して、git cloneします。
+WSL2を起動し、講義用の `workspace` を作成して、その直下に
+`zenoh-tutorial` と `hakoniwa-business-pack` を配置します。
 
-```
+```bash
+mkdir -p workspace
+cd workspace
 git clone --recursive https://github.com/tmori/zenoh-tutorial.git
+git clone https://github.com/hakoniwalab/hakoniwa-business-pack.git
+cd zenoh-tutorial
 ```
+
+```text
+workspace/
+├── zenoh-tutorial/
+└── hakoniwa-business-pack/
+```
+
+通常のZenoh演習では `hakoniwa-business-pack` を使用しません。
+ブラウザで接続Topologyを確認するオプション演習で使用します。
 
 ## docker イメージ作成します
 
@@ -247,6 +261,10 @@ Topology visualization is an opt-in exercise. The normal build, `./pub`,
 `./sub`, and the default `docker-compose.yml` do not require Hakoniwa Business
 Pack. The observer is attached only when both the optional build and the
 `--topology-agent` runtime flag are selected.
+
+This section assumes the host workspace layout shown above. Run Compose from
+`workspace/zenoh-tutorial`; the sibling `workspace/hakoniwa-business-pack`
+directory is mounted into the tutorial containers.
 
 Start the tutorial containers with the optional overlay (add
 `-f docker-compose.mac.yml` on Apple Silicon):
