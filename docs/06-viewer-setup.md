@@ -285,3 +285,14 @@ cp /tmp/viewer-inventory-two-peer.json \
   L3到達可能な `172.30.0.10` を使用します
 - ブラウザ表示は毎秒更新されますが、ノードとリンクに変更がなければ
   グラフ全体を再配置しません
+
+## 9. 図とDetailsの読み方
+
+丸やひし形、線、`tcp` ラベル、件数、クリック時に表示される
+Detailsの各フィールドについては、次のガイドを参照してください。
+
+- [Zenoh Topology Viewerの見方](https://github.com/hakoniwalab/hakoniwa-zenoh-topology-viewer/blob/main/docs/viewer-guide.md)
+
+線はノード間の接続関係を表し、方向を持ちません。PublisherからSubscriberへの
+データ配送方向やclient／serverの関係は表しません。実際にそのlinkを観測した
+Agentは、Detailsの `raw.observed_by` で確認できます。
