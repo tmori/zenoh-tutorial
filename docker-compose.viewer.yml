@@ -1,0 +1,38 @@
+x-viewer-volumes: &viewer-volumes
+  - .:/root/workspace/zenoh-tutorial
+  - ../hakoniwa-business-pack:/root/workspace/hakoniwa-business-pack
+  - ../hakoniwa-pdu-endpoint:/root/workspace/hakoniwa-pdu-endpoint
+  - ../hakoniwa-pdu-bridge-core:/root/workspace/hakoniwa-pdu-bridge-core
+  - ../hakoniwa-pdu-python:/root/workspace/hakoniwa-pdu-python
+  - ../hakoniwa-pdu-registry:/root/workspace/hakoniwa-pdu-registry
+  - ../hakoniwa-pdu-javascript:/root/workspace/hakoniwa-pdu-javascript
+  - ../hakoniwa-zenoh-topology-viewer:/root/workspace/hakoniwa-zenoh-topology-viewer
+
+x-viewer-environment: &viewer-environment
+  HAKONIWA_BUSINESS_PACK_ROOT: /root/workspace/hakoniwa-business-pack
+  HAKO_FOUNDATION_INSTALL: /root/workspace/hakoniwa-business-pack/work/foundation/install
+  HAKO_TOPOLOGY_ENDPOINT_CONFIG: /root/workspace/hakoniwa-business-pack/work/foundation/install/share/hakoniwa/zenoh-topology-viewer/config/agent-out.json
+  HAKO_TOPOLOGY_INTERVAL_MS: "1000"
+  LD_LIBRARY_PATH: /root/workspace/hakoniwa-business-pack/work/foundation/install/lib
+
+services:
+  node_a:
+    build:
+      target: viewer
+    volumes: *viewer-volumes
+    environment: *viewer-environment
+    ports:
+      - "5173:5173"
+      - "8765:8765"
+
+  node_b:
+    build:
+      target: viewer
+    volumes: *viewer-volumes
+    environment: *viewer-environment
+
+  node_c:
+    build:
+      target: viewer
+    volumes: *viewer-volumes
+    environment: *viewer-environment

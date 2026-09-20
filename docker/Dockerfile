@@ -1,5 +1,5 @@
 # Dockerfile
-FROM ubuntu:24.04
+FROM ubuntu:24.04 AS tutorial
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -32,3 +32,11 @@ HEALTHCHECK --interval=10s --timeout=3s --start-period=3s --retries=5 \
 
 RUN mkdir -p /root/workspace
 WORKDIR /root/workspace
+
+FROM tutorial AS viewer
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git ninja-build python3 python3-pip python3-venv ruby \
+    nodejs npm libboost-dev libboost-system-dev libfastcdr-dev \
+    nlohmann-json3-dev \
+ && rm -rf /var/lib/apt/lists/*

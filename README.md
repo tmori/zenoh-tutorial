@@ -240,3 +240,55 @@ echo "deb [trusted=yes] https://download.eclipse.org/zenoh/debian-repo/ /" | sud
 sudo apt update
 sudo apt install zenoh
 ```
+
+## Optional: Hakoniwa Topology Viewer
+
+Topology visualization is an opt-in exercise. The normal build, `./pub`,
+`./sub`, and the default `docker-compose.yml` do not require Hakoniwa Business
+Pack. The observer is attached only when both the optional build and the
+`--topology-agent` runtime flag are selected.
+
+Start the tutorial containers with the optional overlay (add
+`-f docker-compose.mac.yml` on Apple Silicon):
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.viewer.yml up -d --build
+```
+
+In `node_a`, let Business Pack build and install the optional, core-free
+dependency graph, then build the tutorial samples against that install:
+
+```bash
+docker compose exec node_a bash
+cd /root/workspace/hakoniwa-business-pack
+python3 tools/recipe.py doctor --recipe recipes/examples/zenoh-tutorial-topology-viewer.yaml
+python3 tools/recipe.py plan --recipe recipes/examples/zenoh-tutorial-topology-viewer.yaml
+python3 tools/recipe.py configure --recipe recipes/examples/zenoh-tutorial-topology-viewer.yaml
+cd /root/workspace/zenoh-tutorial/sample/c-sample
+./build-viewer.bash
+```
+
+Start the Viewer from `node_a` in one terminal. This uses Launcher
+`activate-only`; Hakoniwa Core and `hako-cmd` are not involved.
+
+```bash
+cd /root/workspace/hakoniwa-business-pack
+python3 tools/recipe.py launch --recipe recipes/examples/zenoh-tutorial-topology-viewer.yaml
+```
+
+Start the subscriber in another `node_a` terminal and the publisher in a
+`node_b` terminal:
+
+```bash
+# node_a
+cd /root/workspace/zenoh-tutorial/sample/c-sample
+./cmake-build-viewer/sub --topology-agent -c ../../config/viewer-node-a.json5
+
+# node_b
+cd /root/workspace/zenoh-tutorial/sample/c-sample
+./cmake-build-viewer/pub --topology-agent -c ../../config/viewer-node-b.json5
+```
+
+Open <http://localhost:5173>. The tutorial data continues to flow directly
+between the two Zenoh peers while their process-local agents send topology
+snapshots to the single Aggregator multiplexer port.

@@ -50,6 +50,7 @@ services:
   node_a:
     build:
       context: ./docker
+      target: tutorial
     platform: linux/amd64
     container_name: node_a
     cap_add: [ "NET_ADMIN" ]
@@ -77,6 +78,7 @@ services:
   node_b:
     build:
       context: ./docker
+      target: tutorial
     platform: linux/amd64
     container_name: node_b
     cap_add: [ "NET_ADMIN" ]
@@ -103,6 +105,7 @@ services:
   node_c:
     build:
       context: ./docker
+      target: tutorial
     platform: linux/amd64
     container_name: node_c
     cap_add: [ "NET_ADMIN" ]

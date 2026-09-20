@@ -29,6 +29,9 @@ struct args_t {
     char* value;                 // -p, --payload
     char* attachment;            // -a, --attach
     bool add_matching_listener;  // --add-matching-listener
+#if defined(HAKO_ZENOH_TOPOLOGY_AGENT)
+    bool topology_agent;         // --topology-agent
+#endif
 };
 struct args_t parse_args(int argc, char** argv, z_owned_config_t* config);
 
@@ -53,7 +56,9 @@ int main(int argc, char** argv) {
         exit(-1);
     }
 #if defined(HAKO_ZENOH_TOPOLOGY_AGENT)
-    hako_topology_agent_attach(z_loan(s), "pub");
+    if (args.topology_agent) {
+        hako_topology_agent_attach(z_loan(s), "pub");
+    }
 #endif
 
     printf("Declaring Publisher on '%s'...\n", args.keyexpr);
@@ -116,6 +121,9 @@ void print_help() {
         -a, --attach <ATTACHMENT> (optional, string, default=NULL): The attachment to add to each put\n\
         --add-matching-listener (optional): Add matching listener\n",
         DEFAULT_KEYEXPR, DEFAULT_VALUE);
+#if defined(HAKO_ZENOH_TOPOLOGY_AGENT)
+    printf("        --topology-agent (optional): Attach the Hakoniwa topology observer\n");
+#endif
     printf(COMMON_HELP);
 }
 
@@ -126,6 +134,9 @@ struct args_t parse_args(int argc, char** argv, z_owned_config_t* config) {
     _Z_PARSE_ARG(args.value, "p", "payload", (char*), (char*)DEFAULT_VALUE);
     _Z_PARSE_ARG(args.attachment, "a", "attach", (char*), (char*)DEFAULT_ATTACHMENT);
     args.add_matching_listener = _Z_CHECK_FLAG("add-matching-listener");
+#if defined(HAKO_ZENOH_TOPOLOGY_AGENT)
+    args.topology_agent = _Z_CHECK_FLAG("topology-agent");
+#endif
 
     parse_zenoh_common_args(argc, argv, config);
     const char* unknown_arg = check_unknown_opts(argc, argv);

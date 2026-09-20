@@ -1,0 +1,5 @@
+{
+  mode: "peer",
+  id: "b",
+  connect: { endpoints: ["tcp/node_a:7447"] },
+}

@@ -38,5 +38,6 @@
 # Local build outputs
 /build/
 /sample/c-sample/cmake-build/
+/sample/c-sample/cmake-build-viewer/
 /zenoh-c-install/*
 !/zenoh-c-install/.gitkeep
