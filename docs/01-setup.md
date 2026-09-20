@@ -110,21 +110,88 @@ routeを確認してください。
 
 ## 5. マルチキャストの到達範囲を確認
 
-端末Aで `node_b` 上のパケットを監視します。
+まず、`node_r` の各インターフェースとDockerネットワークの対応を確認します。
 
 ```bash
-docker exec -it node_b tcpdump -i eth0 -nn 'udp and dst 224.0.0.224 and port 7446'
+docker exec node_r ip -br addr
 ```
 
-端末Bで `node_a` からマルチキャストを送ります。
+通常は次の対応になります。異なる場合は、以降の `eth0` と `eth1` を実際の
+インターフェース名へ読み替えてください。
+
+| `node_r`のインターフェース | IPアドレス | Dockerネットワーク |
+| --- | --- | --- |
+| `eth0` | `172.30.0.254` | `local_net_1` |
+| `eth1` | `172.40.0.254` | `local_net_2` |
+
+### `node_a` から継続送信する
+
+端末Aで、1秒ごとにマルチキャストを送信します。
 
 ```bash
-docker exec node_a sh -c 'echo ping | nc -w 1 -u 224.0.0.224 7446'
+docker exec node_a sh -c \
+  'while true; do echo ping | nc -w 1 -u 224.0.0.224 7446; sleep 1; done'
 ```
 
-端末Aに `172.30.0.10` からのUDPパケットが表示されます。確認後、端末Aで `Ctrl-C` を押します。
+以降の確認が終わるまで、このコマンドを動かしたままにします。
 
-`node_c` は別ネットワークにあるため、このマルチキャストは届きません。後の章では、この違いをZenohの通信で確認します。
+### `node_b` で受信できることを確認する
+
+別の端末で実行します。
+
+```bash
+docker exec node_b tcpdump -i eth0 -nn -c 3 \
+  'udp and dst 224.0.0.224 and port 7446'
+```
+
+`172.30.0.10` からのUDPパケットが3件表示されます。`node_a` と `node_b` は
+同じ `local_net_1` にいるため、マルチキャストを直接受信できます。
+
+### `node_r` の受信側で確認する
+
+`local_net_1` 側の `eth0` を監視します。
+
+```bash
+docker exec node_r tcpdump -i eth0 -nn -c 3 \
+  'udp and dst 224.0.0.224 and port 7446'
+```
+
+`node_b` と同様に、`172.30.0.10` からのUDPパケットが3件表示されます。
+
+### `node_r` の反対側へ転送されないことを確認する
+
+`local_net_2` 側の `eth1` を5秒間監視します。
+
+```bash
+docker exec node_r timeout 5 tcpdump -i eth1 -nn \
+  'udp and dst 224.0.0.224 and port 7446'
+```
+
+パケットが表示されないことを確認します。`node_r` はユニキャストIPパケットを
+転送しますが、現在の設定ではマルチキャストを別ネットワークへ転送しません。
+
+### `node_c` で受信できないことを確認する
+
+```bash
+docker exec node_c timeout 5 tcpdump -i eth0 -nn \
+  'udp and dst 224.0.0.224 and port 7446'
+```
+
+パケットが表示されないことを確認します。`node_c` は `local_net_2` にいるため、
+`local_net_1` の `node_a` が送信したマルチキャストを受信できません。
+
+確認後、端末Aの継続送信を `Ctrl-C` で停止します。
+
+確認結果は次のようになります。
+
+| 観測場所 | 結果 |
+| --- | --- |
+| `node_b` の `eth0` | 受信する |
+| `node_r` の `local_net_1` 側 | 受信する |
+| `node_r` の `local_net_2` 側 | 受信しない |
+| `node_c` の `eth0` | 受信しない |
+
+後の章では、この到達範囲の違いをZenohの通信で確認します。
 
 ## 6. zenoh-cのビルドとインストール
 
