@@ -16,6 +16,9 @@
 
 #include "parse_args.h"
 #include "zenoh.h"
+#if defined(HAKO_ZENOH_TOPOLOGY_AGENT)
+#include "hako_zenoh_topology_agent.h"
+#endif
 
 #define DEFAULT_KEYEXPR "demo/example/zenoh-c-pub"
 #define DEFAULT_VALUE "Pub from C!"
@@ -49,6 +52,9 @@ int main(int argc, char** argv) {
         printf("Unable to open session!\n");
         exit(-1);
     }
+#if defined(HAKO_ZENOH_TOPOLOGY_AGENT)
+    hako_topology_agent_attach(z_loan(s), "pub");
+#endif
 
     printf("Declaring Publisher on '%s'...\n", args.keyexpr);
     z_owned_publisher_t pub;
@@ -93,6 +99,9 @@ int main(int argc, char** argv) {
     }
 
     z_drop(z_move(pub));
+#if defined(HAKO_ZENOH_TOPOLOGY_AGENT)
+    hako_topology_agent_detach();
+#endif
     z_drop(z_move(s));
     return 0;
 }

@@ -16,6 +16,9 @@
 
 #include "parse_args.h"
 #include "zenoh.h"
+#if defined(HAKO_ZENOH_TOPOLOGY_AGENT)
+#include "hako_zenoh_topology_agent.h"
+#endif
 
 #define DEFAULT_KEYEXPR "demo/example/**"
 
@@ -62,6 +65,9 @@ int main(int argc, char** argv) {
         printf("Unable to open session!\n");
         exit(-1);
     }
+#if defined(HAKO_ZENOH_TOPOLOGY_AGENT)
+    hako_topology_agent_attach(z_loan(s), "sub");
+#endif
 
     z_owned_closure_sample_t callback;
     z_closure(&callback, data_handler, NULL, NULL);
@@ -78,6 +84,9 @@ int main(int argc, char** argv) {
     }
 
     z_drop(z_move(sub));
+#if defined(HAKO_ZENOH_TOPOLOGY_AGENT)
+    hako_topology_agent_detach();
+#endif
     z_drop(z_move(s));
     return 0;
 }
