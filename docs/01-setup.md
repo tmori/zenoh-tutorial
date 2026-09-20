@@ -73,14 +73,40 @@ docker compose ps
 
 ## 4. ユニキャスト接続の確認
 
-ホストから次を実行します。
+ホストから、各ノードが残りの2ノードへ到達できることを確認します。
+
+### `node_a` から確認
 
 ```bash
 docker exec node_a ping -c 3 172.30.0.11
 docker exec node_a ping -c 3 172.40.0.10
 ```
 
-どちらも `0% packet loss` になれば、同一ネットワーク内とルータ越しのユニキャスト通信ができています。
+### `node_b` から確認
+
+```bash
+docker exec node_b ping -c 3 172.30.0.10
+docker exec node_b ping -c 3 172.40.0.10
+```
+
+### `node_c` から確認
+
+```bash
+docker exec node_c ping -c 3 172.30.0.10
+docker exec node_c ping -c 3 172.30.0.11
+```
+
+6コマンドすべてが `0% packet loss` になれば、次の経路で双方向の
+ユニキャスト通信ができています。
+
+| ノード間 | 経路 |
+| --- | --- |
+| `node_a` - `node_b` | 同じ `local_net_1` 内で直接通信 |
+| `node_a` - `node_c` | `node_r` を経由してサブネット間通信 |
+| `node_b` - `node_c` | `node_r` を経由してサブネット間通信 |
+
+どれかが失敗した場合は、Zenohの演習へ進む前に対象コンテナのIPアドレスと
+routeを確認してください。
 
 ## 5. マルチキャストの到達範囲を確認
 
