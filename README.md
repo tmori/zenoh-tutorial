@@ -292,3 +292,55 @@ cd /root/workspace/zenoh-tutorial/sample/c-sample
 Open <http://localhost:5173>. The tutorial data continues to flow directly
 between the two Zenoh peers while their process-local agents send topology
 snapshots to the single Aggregator multiplexer port.
+
+### Three-peer full-mesh demo
+
+The three-peer demo uses explicit TCP endpoints so that the topology is
+deterministic across the two Docker networks. Complete the Foundation setup
+above, then select the three-peer inventory in `node_a` before launching the
+Viewer:
+
+```bash
+docker compose exec node_a bash
+cd /root/workspace/hakoniwa-business-pack
+cp "$HAKO_FOUNDATION_INSTALL/share/hakoniwa/zenoh-topology-viewer/config/inventory.json" \
+  /tmp/viewer-inventory-two-peer.json
+cp /root/workspace/zenoh-tutorial/config/viewer-three-peer-inventory.json \
+  "$HAKO_FOUNDATION_INSTALL/share/hakoniwa/zenoh-topology-viewer/config/inventory.json"
+python3 tools/recipe.py launch --recipe recipes/examples/zenoh-tutorial-topology-viewer.yaml
+```
+
+Start one Viewer-enabled sample in each tutorial container:
+
+```bash
+# node_a
+cd /root/workspace/zenoh-tutorial/sample/c-sample
+./cmake-build-viewer/sub --topology-agent -c ../../config/viewer-node-a-mesh.json5
+
+# node_b
+cd /root/workspace/zenoh-tutorial/sample/c-sample
+./cmake-build-viewer/pub --topology-agent -c ../../config/viewer-node-b-mesh.json5
+
+# node_c
+cd /root/workspace/zenoh-tutorial/sample/c-sample
+HAKO_TOPOLOGY_ENDPOINT_CONFIG=/root/workspace/zenoh-tutorial/config/viewer-node-c-agent-out.json \
+  ./cmake-build-viewer/sub --topology-agent -c ../../config/viewer-node-c.json5
+```
+
+Open <http://localhost:5173> and select **Connect**. The stable state is
+`3 nodes / 6 transports / 3 links / connected`: each of the three physical
+links is observed from both ends, while the Viewer deduplicates those
+observations into three links.
+
+To demonstrate failure detection, stop the `node_c` sample with `Ctrl-C` and
+wait more than five seconds. The Viewer changes to
+`partial: stale node-c-peer` without rebuilding the whole graph. Restart the
+same `node_c` command to return to `connected`.
+
+After the demo, restore the normal two-peer inventory before the next Viewer
+launch:
+
+```bash
+cp /tmp/viewer-inventory-two-peer.json \
+  "$HAKO_FOUNDATION_INSTALL/share/hakoniwa/zenoh-topology-viewer/config/inventory.json"
+```
