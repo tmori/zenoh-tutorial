@@ -1,6 +1,0 @@
-{
-  "name": "zenoh-topology-agent-out-node-c",
-  "pdu_def_path": "/root/workspace/hakoniwa-business-pack/work/foundation/install/share/hakoniwa/zenoh-topology-viewer/config/pdudef.json",
-  "cache": "/root/workspace/hakoniwa-business-pack/work/foundation/install/share/hakoniwa/zenoh-topology-viewer/config/pdu-cache.json",
-  "comm": "viewer-node-c-agent-tcp.json"
-}

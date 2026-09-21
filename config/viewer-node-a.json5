@@ -1,5 +1,0 @@
-{
-  mode: "peer",
-  id: "a",
-  listen: { endpoints: ["tcp/0.0.0.0:7447"] },
-}

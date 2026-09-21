@@ -122,7 +122,7 @@ void print_help() {
         --add-matching-listener (optional): Add matching listener\n",
         DEFAULT_KEYEXPR, DEFAULT_VALUE);
 #if defined(HAKO_ZENOH_TOPOLOGY_AGENT)
-    printf("        --topology-agent (optional): Attach the Hakoniwa topology observer\n");
+    printf("        -A, --topology-agent (optional): Attach the Hakoniwa topology observer\n");
 #endif
     printf(COMMON_HELP);
 }
@@ -135,7 +135,9 @@ struct args_t parse_args(int argc, char** argv, z_owned_config_t* config) {
     _Z_PARSE_ARG(args.attachment, "a", "attach", (char*), (char*)DEFAULT_ATTACHMENT);
     args.add_matching_listener = _Z_CHECK_FLAG("add-matching-listener");
 #if defined(HAKO_ZENOH_TOPOLOGY_AGENT)
-    args.topology_agent = _Z_CHECK_FLAG("topology-agent");
+    const bool topology_agent_short = _Z_CHECK_FLAG("A");
+    const bool topology_agent_long = _Z_CHECK_FLAG("topology-agent");
+    args.topology_agent = topology_agent_short || topology_agent_long;
 #endif
 
     parse_zenoh_common_args(argc, argv, config);

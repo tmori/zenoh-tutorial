@@ -1,6 +1,0 @@
-{
-  mode: "peer",
-  id: "c",
-  connect: { endpoints: ["tcp/172.30.0.10:7447", "tcp/172.30.0.11:7447"] },
-  scouting: { multicast: { enabled: false } },
-}

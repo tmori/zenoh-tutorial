@@ -15,7 +15,9 @@ services:
     build:
       target: viewer
     volumes: *viewer-volumes
-    environment: *viewer-environment
+    environment:
+      <<: *viewer-environment
+      HAKO_TOPOLOGY_AGENT_ID: node_a
     ports:
       - "5173:5173"
       - "8765:8765"
@@ -24,10 +26,16 @@ services:
     build:
       target: viewer
     volumes: *viewer-volumes
-    environment: *viewer-environment
+    environment:
+      <<: *viewer-environment
+      HAKO_TOPOLOGY_AGENT_ID: node_b
 
   node_c:
     build:
       target: viewer
     volumes: *viewer-volumes
-    environment: *viewer-environment
+    environment:
+      <<: *viewer-environment
+      HAKO_TOPOLOGY_AGENT_ID: node_c
+    extra_hosts:
+      - "node_a:172.30.0.10"

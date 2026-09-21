@@ -267,7 +267,7 @@ sudo apt install zenoh
 Topology visualization is an opt-in exercise. The normal build, `./pub`,
 `./sub`, and the default `docker-compose.yml` do not require Hakoniwa Business
 Pack. The observer is attached only when both the optional build and the
-`--topology-agent` runtime flag are selected.
+`-A` (or `--topology-agent`) runtime flag are selected.
 
 This section assumes the host workspace layout shown above. Run Compose from
 `workspace/zenoh-tutorial`; the sibling `workspace/hakoniwa-business-pack`
@@ -307,65 +307,20 @@ Start the subscriber in another `node_a` terminal and the publisher in a
 ```bash
 # node_a
 cd /root/workspace/zenoh-tutorial/sample/c-sample
-./cmake-build-viewer/sub --topology-agent -c ../../config/viewer-node-a.json5
+./cmake-build-viewer/sub -A -c config-multicast.json
 
 # node_b
 cd /root/workspace/zenoh-tutorial/sample/c-sample
-./cmake-build-viewer/pub --topology-agent -c ../../config/viewer-node-b.json5
+./cmake-build-viewer/pub -A -c config-multicast.json
 ```
 
 Open <http://localhost:5173>. The tutorial data continues to flow directly
 between the two Zenoh peers while their process-local agents send topology
 snapshots to the single Aggregator multiplexer port.
 
-### Three-peer full-mesh demo
-
-The three-peer demo uses explicit TCP endpoints so that the topology is
-deterministic across the two Docker networks. Complete the Foundation setup
-above, then select the three-peer inventory in `node_a` before launching the
-Viewer:
-
-```bash
-docker compose exec node_a bash
-cd /root/workspace/hakoniwa-business-pack
-cp "$HAKO_FOUNDATION_INSTALL/share/hakoniwa/zenoh-topology-viewer/config/inventory.json" \
-  /tmp/viewer-inventory-two-peer.json
-cp /root/workspace/zenoh-tutorial/config/viewer-three-peer-inventory.json \
-  "$HAKO_FOUNDATION_INSTALL/share/hakoniwa/zenoh-topology-viewer/config/inventory.json"
-python3 tools/recipe.py launch --recipe recipes/examples/zenoh-tutorial-topology-viewer.yaml
-```
-
-Start one Viewer-enabled sample in each tutorial container:
-
-```bash
-# node_a
-cd /root/workspace/zenoh-tutorial/sample/c-sample
-./cmake-build-viewer/sub --topology-agent -c ../../config/viewer-node-a-mesh.json5
-
-# node_b
-cd /root/workspace/zenoh-tutorial/sample/c-sample
-./cmake-build-viewer/pub --topology-agent -c ../../config/viewer-node-b-mesh.json5
-
-# node_c
-cd /root/workspace/zenoh-tutorial/sample/c-sample
-HAKO_TOPOLOGY_ENDPOINT_CONFIG=/root/workspace/zenoh-tutorial/config/viewer-node-c-agent-out.json \
-  ./cmake-build-viewer/sub --topology-agent -c ../../config/viewer-node-c.json5
-```
-
-Open <http://localhost:5173> and select **Connect**. The stable state is
-`3 nodes / 6 transports / 3 links / connected`: each of the three physical
-links is observed from both ends, while the Viewer deduplicates those
-observations into three links.
-
-To demonstrate failure detection, stop the `node_c` sample with `Ctrl-C` and
-wait more than five seconds. The Viewer changes to
-`partial: stale node-c-peer` without rebuilding the whole graph. Restart the
-same `node_c` command to return to `connected`.
-
-After the demo, restore the normal two-peer inventory before the next Viewer
-launch:
-
-```bash
-cp /tmp/viewer-inventory-two-peer.json \
-  "$HAKO_FOUNDATION_INSTALL/share/hakoniwa/zenoh-topology-viewer/config/inventory.json"
-```
+The Viewer does not require a separate Zenoh configuration. For later
+exercises, keep each exercise's existing `-c` file and other options, switch
+the executable from `cmake-build` to `cmake-build-viewer`, and add `-A`.
+Agents are registered dynamically, including an Agent started in `node_c`.
+See [docs/06-viewer-setup.md](docs/06-viewer-setup.md) for the complete
+lecture procedure and shutdown steps.

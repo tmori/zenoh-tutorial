@@ -111,11 +111,9 @@ cd /root/workspace/zenoh-tutorial/sample/c-sample
 通常版の `cmake-build/pub` と `cmake-build/sub` は変更されません。
 Viewer対応版は `cmake-build-viewer` に生成されます。
 
-## 4. 2 Peerのリンクを表示する
+## 4. Viewerを起動する
 
-### Viewerを起動する
-
-端末Aの `node_a` で起動します。
+`node_a` で起動します。
 
 ```bash
 cd /root/workspace/hakoniwa-business-pack
@@ -126,75 +124,26 @@ python3 tools/recipe.py launch \
 このLauncherはBridge、Webサーバー、Aggregatorを起動します。
 Hakoniwa Coreと `hako-cmd` は使用しません。
 
-### node_aでSubscriberを起動する
-
-別の端末から実行します。
-
-```bash
-docker compose exec node_a bash
-cd /root/workspace/zenoh-tutorial/sample/c-sample
-./cmake-build-viewer/sub \
-  --topology-agent \
-  -c ../../config/viewer-node-a.json5
-```
-
-### node_bでPublisherを起動する
-
-さらに別の端末から実行します。
-
-```bash
-docker compose exec node_b bash
-cd /root/workspace/zenoh-tutorial/sample/c-sample
-./cmake-build-viewer/pub \
-  --topology-agent \
-  -c ../../config/viewer-node-b.json5
-```
-
 ホストのブラウザで <http://localhost:5173> を開き、**Connect**を押します。
+この時点では観測対象のZenoh sessionがないため、ノードは表示されません。
 
-正常時は次の状態になります。
+## 5. 通常演習と一緒にTopologyを表示する
 
-```text
-2 nodes
-2 transports
-1 link
-connected
-```
-
-## 5. 3 Peer完全メッシュを表示する
-
-より複雑な構成では、次の3リンクを同時に確認します。
+第2章以降の既存コマンドで、実行ファイルを`cmake-build-viewer`版へ置き換え、
+`-A`を追加します。ZenohのJSON設定、`--mode`、`-e`などは変更しません。
 
 ```text
-        node_a
-        /    \
-       /      \
-  node_b ---- node_c
+通常:
+  cmake-build/pub <既存のオプション>
+  cmake-build/sub <既存のオプション>
+
+Topology表示あり:
+  cmake-build-viewer/pub -A <同じオプション>
+  cmake-build-viewer/sub -A <同じオプション>
 ```
 
-2 Peer用Launcherが動いている場合は、いったんDocker環境を終了してから
-第2章の手順で起動し直してください。
-
-### 3 Peer用inventoryを選択する
-
-`node_a` で通常のinventoryを退避し、3 Peer用へ切り替えます。
-
-```bash
-docker compose exec node_a bash
-cd /root/workspace/hakoniwa-business-pack
-
-cp "$HAKO_FOUNDATION_INSTALL/share/hakoniwa/zenoh-topology-viewer/config/inventory.json" \
-  /tmp/viewer-inventory-two-peer.json
-cp /root/workspace/zenoh-tutorial/config/viewer-three-peer-inventory.json \
-  "$HAKO_FOUNDATION_INSTALL/share/hakoniwa/zenoh-topology-viewer/config/inventory.json"
-
-python3 tools/recipe.py launch \
-  --recipe recipes/examples/zenoh-tutorial-topology-viewer.yaml
-```
-
-### 3つのPeerを起動する
-
-それぞれ別の端末で実行します。
+例えば、第2章のマルチキャストPub/Subを表示する場合は、それぞれ別の端末で
+次を実行します。
 
 node_a:
 
@@ -202,8 +151,8 @@ node_a:
 docker compose exec node_a bash
 cd /root/workspace/zenoh-tutorial/sample/c-sample
 ./cmake-build-viewer/sub \
-  --topology-agent \
-  -c ../../config/viewer-node-a-mesh.json5
+  -A \
+  -c config-multicast.json
 ```
 
 node_b:
@@ -212,47 +161,19 @@ node_b:
 docker compose exec node_b bash
 cd /root/workspace/zenoh-tutorial/sample/c-sample
 ./cmake-build-viewer/pub \
-  --topology-agent \
-  -c ../../config/viewer-node-b-mesh.json5
+  -A \
+  -c config-multicast.json
 ```
 
-node_c:
-
-```bash
-docker compose exec node_c bash
-cd /root/workspace/zenoh-tutorial/sample/c-sample
-HAKO_TOPOLOGY_ENDPOINT_CONFIG=/root/workspace/zenoh-tutorial/config/viewer-node-c-agent-out.json \
-  ./cmake-build-viewer/sub \
-  --topology-agent \
-  -c ../../config/viewer-node-c.json5
-```
-
-ブラウザで <http://localhost:5173> を開き、**Connect**を押します。
-
-正常時は次の状態になります。
-
-```text
-3 nodes
-6 transports
-3 links
-connected
-```
-
-3本の物理リンクを両端のAgentから観測するためtransportは6件です。
-Viewerは両側の観測結果を集約し、リンクを3本に重複排除して表示します。
+Viewerは起動したAgentを動的に認識します。ノードIDは通常演習でZenohが割り当てた
+IDを短縮表示し、完全な値はDetailsで確認できます。`node_c`からAggregatorへの
+接続設定もDocker Composeが与えるため、追加指定は不要です。
 
 ## 6. staleと復旧を確認する
 
-`node_c` のサンプルを `Ctrl-C` で停止し、5秒以上待ちます。
-
-```text
-partial: stale node-c-peer
-```
-
-と表示されます。この更新では既存グラフ全体を再配置せず、変更された
-状態だけを反映します。
-
-同じ `node_c` のコマンドを再実行すると、完全メッシュと `connected` 状態へ
+`-A`を付けて起動した任意のサンプルを`Ctrl-C`で停止し、5秒以上待つと、
+そのAgentが`stale`になります。この更新では既存グラフ全体を再配置せず、
+変更された状態だけを反映します。同じコマンドを再実行すると`connected`へ
 復旧します。
 
 ## 7. 演習を終了する
@@ -279,21 +200,10 @@ docker compose \
   down
 ```
 
-3 Peer用inventoryから通常構成へ戻す場合は、次回のDocker起動後に
-Foundationの `configure` を再実行するか、コンテナを停止する前に次を
-実行します。
-
-```bash
-cp /tmp/viewer-inventory-two-peer.json \
-  "$HAKO_FOUNDATION_INSTALL/share/hakoniwa/zenoh-topology-viewer/config/inventory.json"
-```
-
 ## 8. 注意点
 
-- `--topology-agent` を付けたときだけTopology Agentが動作します
+- `-A`または`--topology-agent`を付けたときだけTopology Agentが動作します
 - Aggregatorが動作していなくても、通常のZenoh pub/sub処理は継続します
-- `node_c` は別のDockerネットワークにいるため、Aggregatorへの接続には
-  L3到達可能な `172.30.0.10` を使用します
 - ブラウザ表示は毎秒更新されますが、ノードとリンクに変更がなければ
   グラフ全体を再配置しません
 

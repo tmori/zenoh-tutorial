@@ -1,8 +1,0 @@
-{
-  "protocol": "tcp",
-  "name": "zenoh_topology_agent_client_node_c",
-  "direction": "out",
-  "role": "client",
-  "comm_raw_version": "v2",
-  "remote": { "address": "172.30.0.10", "port": 9200 }
-}
