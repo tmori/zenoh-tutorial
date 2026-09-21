@@ -165,9 +165,10 @@ cd /root/workspace/zenoh-tutorial/sample/c-sample
   -c config-multicast.json
 ```
 
-Viewerは起動したAgentを動的に認識します。ノードIDは通常演習でZenohが割り当てた
-IDを短縮表示し、完全な値はDetailsで確認できます。`node_c`からAggregatorへの
-接続設定もDocker Composeが与えるため、追加指定は不要です。
+Viewerは起動したAgentを動的に認識します。Agentを特定できるノードは
+`node_a:sub`や`node_b:pub`のように表示し、完全なZenoh IDはDetailsの
+`zid`で確認できます。`node_c`からAggregatorへの接続設定もDocker Composeが
+与えるため、追加指定は不要です。
 
 ## 6. staleと復旧を確認する
 

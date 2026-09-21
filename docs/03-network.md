@@ -91,6 +91,39 @@ cd /root/workspace
 
 受信できることを確認し、両方の端末で `Ctrl-C` を押します。
 
+### ViewerでTCP linkが2本見える理由
+
+マルチキャストはPeerを発見するために使われ、発見後の通信にはTCP linkが
+確立されます。Zenoh 1.10のPeer向け既定値では、マルチキャストで発見した
+相手への `autoconnect_strategy` が `always` です。このため、相互到達可能な
+2つのPeerがそれぞれ接続を開始し、同じPeer間にTCP linkが2本できる場合が
+あります。
+
+```text
+Peer AがBを発見 -> AからBへTCP接続
+Peer BがAを発見 -> BからAへTCP接続
+```
+
+どちらのTCP linkも双方向です。Publisher向け／Subscriber向けに1本ずつ、
+という意味ではありません。ViewerのDetailsで `src_endpoint` と
+`dst_endpoint` のポート番号の組が異なれば、別のTCP linkであることを確認できます。
+
+重複接続を避けたい場合は、両Peerの `scouting.multicast` に次を設定すると、
+ZIDの大小関係により一方だけが接続を開始します。
+
+```json
+"autoconnect_strategy": {
+  "peer": {
+    "to_router": "always",
+    "to_peer": "greater-zid"
+  }
+}
+```
+
+ただし `greater-zid` は、NATなどにより片方向からしか接続できない構成には
+適さない場合があります。この演習ではZenohの既定動作を観察するため、
+`always`のままにしています。
+
 ## Zenoh公式資料
 
 - [Deployment](https://zenoh.io/docs/getting-started/deployment/): Peer、Client、Routerの通信モデルと明示的なEndpoint接続
