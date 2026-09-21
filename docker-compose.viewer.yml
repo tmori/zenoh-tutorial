@@ -1,12 +1,7 @@
 x-viewer-volumes: &viewer-volumes
-  - .:/root/workspace/zenoh-tutorial
-  - ../hakoniwa-business-pack:/root/workspace/hakoniwa-business-pack
-  - ../hakoniwa-pdu-endpoint:/root/workspace/hakoniwa-pdu-endpoint
-  - ../hakoniwa-pdu-bridge-core:/root/workspace/hakoniwa-pdu-bridge-core
-  - ../hakoniwa-pdu-python:/root/workspace/hakoniwa-pdu-python
-  - ../hakoniwa-pdu-registry:/root/workspace/hakoniwa-pdu-registry
-  - ../hakoniwa-pdu-javascript:/root/workspace/hakoniwa-pdu-javascript
-  - ../hakoniwa-zenoh-topology-viewer:/root/workspace/hakoniwa-zenoh-topology-viewer
+  # Mount the workspace as one unit. Recipe configure clones missing sibling
+  # repositories here; individual mounts would create empty host directories.
+  - ..:/root/workspace
 
 x-viewer-environment: &viewer-environment
   HAKONIWA_BUSINESS_PACK_ROOT: /root/workspace/hakoniwa-business-pack

@@ -25,6 +25,14 @@ git clone https://github.com/hakoniwalab/hakoniwa-business-pack.git
 cd zenoh-tutorial
 ```
 
+事前にcloneするのは、この2リポジトリだけです。`hakoniwa-pdu-endpoint`、
+`hakoniwa-pdu-bridge-core`、`hakoniwa-pdu-python`、
+`hakoniwa-pdu-registry`、`hakoniwa-pdu-javascript`、
+`hakoniwa-zenoh-topology-viewer`は、Docker Composeではなく、後述の
+Business Packの`configure`が
+`workspace`直下へcloneします。これらの空ディレクトリをあらかじめ作成しないで
+ください。
+
 ## 1. Viewerで確認できること
 
 ブラウザには次の情報が表示されます。
@@ -89,6 +97,40 @@ python3 tools/recipe.py plan \
 python3 tools/recipe.py configure \
   --recipe recipes/examples/zenoh-tutorial-topology-viewer.yaml
 ```
+
+初回の`doctor`でFoundationや依存リポジトリが`MISSING`と表示されるのは正常です。
+`doctor`は状態を確認するだけで、ファイルを変更しません。`plan`でclone／build予定を
+確認し、`configure`で不足している依存リポジトリのclone、Foundationの構築、
+Recipe runtimeの生成を行います。
+
+旧版の`docker-compose.viewer.yml`を一度起動し、次のエラーが表示された場合は、
+個別bind mountによって空の兄弟ディレクトリが作られています。
+
+```text
+error: existing foundation source is invalid: hakoniwa-pdu-endpoint ...
+```
+
+Docker環境を終了して最新版を取得した後、ホストの`workspace`で次を実行します。
+`rmdir`は空ディレクトリだけを削除し、実体のあるcheckoutは削除しません。
+
+```bash
+cd workspace/zenoh-tutorial
+docker compose \
+  -f docker-compose.yml \
+  -f docker-compose.viewer.yml \
+  down
+git pull
+
+cd ..
+rmdir hakoniwa-pdu-endpoint \
+  hakoniwa-pdu-bridge-core \
+  hakoniwa-pdu-python \
+  hakoniwa-pdu-registry \
+  hakoniwa-pdu-javascript \
+  hakoniwa-zenoh-topology-viewer
+```
+
+その後、第2章のComposeコマンドからやり直してください。
 
 Viewer対応版のCサンプルをビルドします。
 
