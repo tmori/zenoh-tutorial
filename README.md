@@ -267,7 +267,7 @@ sudo apt install zenoh
 Topology visualization is an opt-in exercise. The normal build, `./pub`,
 `./sub`, and the default `docker-compose.yml` do not require Hakoniwa Business
 Pack. The observer is attached only when both the optional build and the
-`-A` (or `--topology-agent`) runtime flag are selected.
+`-A <name>` (or `--topology-agent <name>`) runtime option is selected.
 
 This section assumes the host workspace layout shown above. Run Compose from
 `workspace/zenoh-tutorial`; the sibling `workspace/hakoniwa-business-pack`
@@ -307,11 +307,11 @@ Start the subscriber in another `node_a` terminal and the publisher in a
 ```bash
 # node_a
 cd /root/workspace/zenoh-tutorial/sample/c-sample
-./cmake-build-viewer/sub -A -c config-multicast.json
+./cmake-build-viewer/sub -A node_a-sub -c config-multicast.json
 
 # node_b
 cd /root/workspace/zenoh-tutorial/sample/c-sample
-./cmake-build-viewer/pub -A -c config-multicast.json
+./cmake-build-viewer/pub -A node_b-pub -c config-multicast.json
 ```
 
 Open <http://localhost:5173>. The tutorial data continues to flow directly
@@ -320,7 +320,8 @@ snapshots to the single Aggregator multiplexer port.
 
 The Viewer does not require a separate Zenoh configuration. For later
 exercises, keep each exercise's existing `-c` file and other options, switch
-the executable from `cmake-build` to `cmake-build-viewer`, and add `-A`.
+the executable from `cmake-build` to `cmake-build-viewer`, and add
+`-A <display-name>`.
 Agents are registered dynamically, including an Agent started in `node_c`.
 See [docs/06-viewer-setup.md](docs/06-viewer-setup.md) for the complete
 lecture procedure and shutdown steps.

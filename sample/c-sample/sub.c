@@ -25,7 +25,7 @@
 struct args_t {
     char* keyexpr;  // -k, --key
 #if defined(HAKO_ZENOH_TOPOLOGY_AGENT)
-    bool topology_agent;  // --topology-agent
+    char* topology_agent_name;  // -A, --topology-agent
 #endif
 };
 struct args_t parse_args(int argc, char** argv, z_owned_config_t* config);
@@ -69,8 +69,8 @@ int main(int argc, char** argv) {
         exit(-1);
     }
 #if defined(HAKO_ZENOH_TOPOLOGY_AGENT)
-    if (args.topology_agent) {
-        hako_topology_agent_attach(z_loan(s), "sub");
+    if (args.topology_agent_name != NULL) {
+        hako_topology_agent_attach(z_loan(s), args.topology_agent_name);
     }
 #endif
 
@@ -115,7 +115,7 @@ void print_help() {
         -k, --key <KEYEXPR> (optional, string, default='%s'): The key expression to subscribe to\n",
         DEFAULT_KEYEXPR);
 #if defined(HAKO_ZENOH_TOPOLOGY_AGENT)
-    printf("        -A, --topology-agent (optional): Attach the Hakoniwa topology observer\n");
+    printf("        -A <NAME>, --topology-agent <NAME> (optional): Attach the Hakoniwa topology observer with a display name\n");
 #endif
     printf(COMMON_HELP);
 }
@@ -125,9 +125,7 @@ struct args_t parse_args(int argc, char** argv, z_owned_config_t* config) {
     struct args_t args;
     _Z_PARSE_ARG(args.keyexpr, "k", "key", (char*), (char*)DEFAULT_KEYEXPR);
 #if defined(HAKO_ZENOH_TOPOLOGY_AGENT)
-    const bool topology_agent_short = _Z_CHECK_FLAG("A");
-    const bool topology_agent_long = _Z_CHECK_FLAG("topology-agent");
-    args.topology_agent = topology_agent_short || topology_agent_long;
+    _Z_PARSE_ARG(args.topology_agent_name, "A", "topology-agent", (char*), NULL);
 #endif
 
     parse_zenoh_common_args(argc, argv, config);

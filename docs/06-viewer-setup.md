@@ -130,7 +130,7 @@ Hakoniwa Coreと `hako-cmd` は使用しません。
 ## 5. 通常演習と一緒にTopologyを表示する
 
 第2章以降の既存コマンドで、実行ファイルを`cmake-build-viewer`版へ置き換え、
-`-A`を追加します。ZenohのJSON設定、`--mode`、`-e`などは変更しません。
+`-A <表示名>`を追加します。ZenohのJSON設定、`--mode`、`-e`などは変更しません。
 
 ```text
 通常:
@@ -138,8 +138,8 @@ Hakoniwa Coreと `hako-cmd` は使用しません。
   cmake-build/sub <既存のオプション>
 
 Topology表示あり:
-  cmake-build-viewer/pub -A <同じオプション>
-  cmake-build-viewer/sub -A <同じオプション>
+  cmake-build-viewer/pub -A <表示名> <同じオプション>
+  cmake-build-viewer/sub -A <表示名> <同じオプション>
 ```
 
 例えば、第2章のマルチキャストPub/Subを表示する場合は、それぞれ別の端末で
@@ -151,7 +151,7 @@ node_a:
 docker compose exec node_a bash
 cd /root/workspace/zenoh-tutorial/sample/c-sample
 ./cmake-build-viewer/sub \
-  -A \
+  -A node_a-sub \
   -c config-multicast.json
 ```
 
@@ -161,18 +161,21 @@ node_b:
 docker compose exec node_b bash
 cd /root/workspace/zenoh-tutorial/sample/c-sample
 ./cmake-build-viewer/pub \
-  -A \
+  -A node_b-pub \
   -c config-multicast.json
 ```
 
-Viewerは起動したAgentを動的に認識します。Agentを特定できるノードは
-`node_a:sub`や`node_b:pub`のように表示し、完全なZenoh IDはDetailsの
-`zid`で確認できます。`node_c`からAggregatorへの接続設定もDocker Composeが
-与えるため、追加指定は不要です。
+Viewerは起動したAgentを動的に認識し、`-A`に指定した名前をノードへ表示します。
+完全なZenoh IDはDetailsの`zid`で確認できます。`node_c`からAggregatorへの
+接続設定もDocker Composeが与えるため、追加指定は不要です。
+
+同じコンテナで複数のsessionを起動する場合は、それぞれ異なる表示名を付けると
+区別しやすくなります。同じ名前を指定しても内部ではZIDで区別され、Viewerが
+短縮ZIDを名前へ補います。
 
 ## 6. staleと復旧を確認する
 
-`-A`を付けて起動した任意のサンプルを`Ctrl-C`で停止し、5秒以上待つと、
+`-A <表示名>`を付けて起動した任意のサンプルを`Ctrl-C`で停止し、5秒以上待つと、
 そのAgentが`stale`になります。この更新では既存グラフ全体を再配置せず、
 変更された状態だけを反映します。同じコマンドを再実行すると`connected`へ
 復旧します。
@@ -203,7 +206,7 @@ docker compose \
 
 ## 8. 注意点
 
-- `-A`または`--topology-agent`を付けたときだけTopology Agentが動作します
+- `-A <表示名>`または`--topology-agent <表示名>`を指定したときだけTopology Agentが動作します
 - Aggregatorが動作していなくても、通常のZenoh pub/sub処理は継続します
 - ブラウザ表示は毎秒更新されますが、ノードとリンクに変更がなければ
   グラフ全体を再配置しません
