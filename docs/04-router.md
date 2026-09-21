@@ -8,11 +8,25 @@
 
 Dockerの `node_r` はユニキャストIPパケットを転送しますが、マルチキャスト探索は別ネットワークへ転送しません。そのため、`node_a`と`node_c`はマルチキャスト探索だけでは相手を発見できません。
 
-この演習では、`node_c`でZenoh Router (`zenohd`) を起動し、各ノードがそのエンドポイントへ接続します。
+この演習では、`node_c`でZenoh Router (`zenohd`) を起動し、`node_a`、
+`node_b`、`node_c`で動かす3つのClientを同じRouterへ接続します。
+`node_c`では、RouterとClient Cを別プロセスとして同時に実行します。
+
+```text
+Client A (node_a) ----\
+                       \
+Client B (node_b) ------ Router (node_c)
+                       /
+Client C (node_c) ----/
+```
+
+Client同士が直接sessionを確立するのではなく、3つのClientが共通のRouterを
+Entry Pointとして利用し、Routerがkey expressionに基づいてデータを中継する
+構成を確認します。
 
 ## 1. TCPでZenoh Routerを利用する
 
-3つの端末を使用します。
+4つの端末を使用します。
 
 ### Zenoh Router
 
@@ -28,9 +42,9 @@ zenohd -l tcp/172.40.0.10:7446
 
 この端末はZenoh Routerの実行に使うため、そのままにしておきます。
 
-### Subscriber
+### Client B: Subscriber
 
-端末Bで `node_b` を起動し、Zenoh Routerへ接続します。
+端末Bで `node_b` に接続し、Client BをSubscriberとして起動します。
 
 ```bash
 docker exec -it node_b bash
@@ -41,9 +55,9 @@ cd /root/workspace
 ./sample/c-sample/cmake-build/sub --mode client -e tcp/172.40.0.10:7446
 ```
 
-### Publisher
+### Client A: Publisher
 
-端末Cで `node_a` を起動し、同じZenoh Routerへ接続します。
+端末Cで `node_a` に接続し、Client AをPublisherとして起動します。
 
 ```bash
 docker exec -it node_a bash
@@ -51,16 +65,46 @@ docker exec -it node_a bash
 
 ```bash
 cd /root/workspace
-./sample/c-sample/cmake-build/pub --mode client -e tcp/172.40.0.10:7446
+./sample/c-sample/cmake-build/pub --mode client \
+  -e tcp/172.40.0.10:7446 \
+  -p "Pub from Client A!"
 ```
 
-端末Bに受信結果が表示されれば、Zenoh Routerを介したTCP通信は成功です。
+### Client C: Publisher
 
-確認後、Publisher、Subscriber、Zenoh Routerの順に、それぞれの端末で `Ctrl-C` を押します。
+端末Dで `node_c` に接続します。Routerを実行している端末Aとは別の端末を
+使用してください。
+
+```bash
+docker exec -it node_c bash
+```
+
+Client CをPublisherとして起動し、同じコンテナ内で動いているRouterへ接続します。
+
+```bash
+cd /root/workspace
+./sample/c-sample/cmake-build/pub --mode client \
+  -e tcp/172.40.0.10:7446 \
+  -p "Pub from Client C!"
+```
+
+端末Bに、Client AとClient Cからの受信結果が交互に表示されることを確認します。
+
+```text
+>> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   0] Pub from Client A!')
+>> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   0] Pub from Client C!')
+```
+
+これで、異なるサブネットに配置されたClient A／Bと、Routerと同じ
+`node_c`で動くClient Cが、共通のZenoh Routerを介して通信できることを
+確認できます。
+
+確認後、Client A、Client C、Client B、Zenoh Routerの順に、それぞれの端末で
+`Ctrl-C`を押します。
 
 ## 2. UDPでZenoh Routerを利用する
 
-TCPの場合と同様に、3つの端末を使用します。
+TCPの場合と同様に、4つの端末を使用します。
 
 端末Aの `node_c` でZenoh Routerを起動します。
 
@@ -68,23 +112,36 @@ TCPの場合と同様に、3つの端末を使用します。
 zenohd -l udp/172.40.0.10:7446
 ```
 
-端末Bの `node_b` でSubscriberを起動します。
+端末Bの `node_b` でClient BをSubscriberとして起動します。
 
 ```bash
 cd /root/workspace
 ./sample/c-sample/cmake-build/sub --mode client -e udp/172.40.0.10:7446
 ```
 
-端末Cの `node_a` でPublisherを起動します。
+端末Cの `node_a` でClient AをPublisherとして起動します。
 
 ```bash
 cd /root/workspace
-./sample/c-sample/cmake-build/pub --mode client -e udp/172.40.0.10:7446
+./sample/c-sample/cmake-build/pub --mode client \
+  -e udp/172.40.0.10:7446 \
+  -p "Pub from Client A!"
 ```
 
-端末Bに受信結果が表示されれば、Zenoh Routerを介したUDP通信は成功です。
+端末Dの `node_c` でClient CをPublisherとして起動します。
 
-確認後、Publisher、Subscriber、Zenoh Routerの順に、それぞれの端末で `Ctrl-C` を押します。
+```bash
+cd /root/workspace
+./sample/c-sample/cmake-build/pub --mode client \
+  -e udp/172.40.0.10:7446 \
+  -p "Pub from Client C!"
+```
+
+端末Bに、Client AとClient Cからの受信結果が交互に表示されれば、3つのClientを
+Zenoh Routerへ接続したUDP通信は成功です。
+
+確認後、Client A、Client C、Client B、Zenoh Routerの順に、それぞれの端末で
+`Ctrl-C`を押します。
 
 ## 3. Peer直結とRouter経由のネットワーク接続構成
 
