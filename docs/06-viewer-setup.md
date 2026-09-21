@@ -86,7 +86,8 @@ Foundationを構築します。
 
 `doctor`で現在の状態を確認し、`plan`でclone／build予定を確認した後、
 `configure`で依存リポジトリの取得、Foundationの構築、Recipe runtimeの生成を
-行います。
+行います。第1章で作成した`zenoh-c`のRustビルド成果物は再利用され、Foundation用の
+install prefixへインストールされます。
 
 ```bash
 docker compose exec node_a bash

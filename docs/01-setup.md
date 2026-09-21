@@ -205,10 +205,19 @@ docker exec -it node_a bash
 
 ```bash
 cd /root/workspace/zenoh-c
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/root/workspace/zenoh-c-install
+cmake -S . -B build \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_INSTALL_PREFIX=/root/workspace/zenoh-c-install \
+  -DBUILD_SHARED_LIBS=ON \
+  -DZENOHC_BUILD_WITH_UNSTABLE_API=ON \
+  -DZENOHC_BUILD_WITH_SHARED_MEMORY=OFF \
+  -DZENOHC_BUILD_IN_SOURCE_TREE=ON
 cmake --build build --config Release
 cmake --install build --config Release
 ```
+
+ここでは後のTopology Viewer演習でも同じRustビルド成果物を再利用できる設定で
+ビルドします。通常のZenoh演習では、従来どおり安定APIだけを使用します。
 
 インストールされたライブラリを確認します。
 

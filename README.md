@@ -107,13 +107,20 @@ docker compose down --rmi all
 Zenoh-c をインストールするには、以下の手順を実行します。
 
 ```
-cd zenoh-c
-mkdir -p build
-cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=/root/workspace/zenoh-c-install
-cmake --build . --config Release
-cmake --build . --target install
+cd /root/workspace/zenoh-c
+cmake -S . -B build \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_INSTALL_PREFIX=/root/workspace/zenoh-c-install \
+  -DBUILD_SHARED_LIBS=ON \
+  -DZENOHC_BUILD_WITH_UNSTABLE_API=ON \
+  -DZENOHC_BUILD_WITH_SHARED_MEMORY=OFF \
+  -DZENOHC_BUILD_IN_SOURCE_TREE=ON
+cmake --build build --config Release
+cmake --install build --config Release
 ```
+
+この設定では、通常のサンプルとTopology Viewer用FoundationでRustのビルド成果物を
+共有できます。通常のサンプルは安定APIだけを使用します。
 
 ## Sample のビルド
 

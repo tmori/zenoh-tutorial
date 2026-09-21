@@ -90,6 +90,7 @@ def main(argv: list[str] | None = None) -> int:
     features = cfg.get("features", {})
     validation = cfg.get("validation", {})
     build_dir = resolved_path(str(build_cfg.get("dir", "build/zenoh-c")), tutorial_root)
+    in_source_tree = build_cfg.get("in_source_tree") is True
     state_dir = args.state_dir.expanduser().resolve() if args.state_dir else tutorial_root / ".hako"
     install_dir = args.install_dir.expanduser().resolve() if args.install_dir else None
     unstable = features.get("unstable_api") is True
@@ -113,6 +114,7 @@ def main(argv: list[str] | None = None) -> int:
                 "build:",
                 f"  type: {yaml(build_cfg.get('type', 'Release'))}",
                 f"  dir: {yaml(build_dir)}",
+                f"  in_source_tree: {yaml(in_source_tree)}",
                 "features:",
                 f"  unstable_api: {yaml(unstable)}",
                 f"  shared_memory: {yaml(features.get('shared_memory') is True)}",
@@ -134,6 +136,7 @@ def main(argv: list[str] | None = None) -> int:
         "-DBUILD_SHARED_LIBS=ON",
         "-DZENOHC_BUILD_WITH_UNSTABLE_API=ON",
         f"-DZENOHC_BUILD_WITH_SHARED_MEMORY={'ON' if features.get('shared_memory') is True else 'OFF'}",
+        f"-DZENOHC_BUILD_IN_SOURCE_TREE={'ON' if in_source_tree else 'OFF'}",
     ]
     if install_dir:
         cmake_args.append(f"-DCMAKE_INSTALL_PREFIX={install_dir}")
