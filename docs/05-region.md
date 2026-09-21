@@ -102,6 +102,10 @@ local_net_2 / South Region
 | `config-region-north.json5` | node_b | Southフィルターに一致しないPeer |
 | `config-region-south.json5` | node_c | `classroom-south` を提示するPeer |
 
+Topology Viewerを併用する場合は、先に[第6章](06-viewer-setup.md)の準備と
+Launcher起動を行ってください。各Pub/Subには通常版とViewer併用版のコマンドを
+併記しています。Gatewayとして起動する`zenohd`のコマンドは通常版と共通です。
+
 ## 4. Gatewayを起動する
 
 端末Aで `node_a` に接続します。
@@ -142,6 +146,14 @@ cd /root/workspace
 ./sample/c-sample/cmake-build/sub -c sample/c-sample/config-region-north.json5
 ```
 
+Viewer併用時:
+
+```bash
+./sample/c-sample/cmake-build-viewer/sub \
+  -A north-subscriber \
+  -c sample/c-sample/config-region-north.json5
+```
+
 node_bはSouthフィルターに一致せず、Gatewayと同じ `peer` なのでNorthとして扱われます。
 
 ### South側Publisher
@@ -157,6 +169,14 @@ cd /root/workspace
 ./sample/c-sample/cmake-build/pub -c sample/c-sample/config-region-south.json5
 ```
 
+Viewer併用時:
+
+```bash
+./sample/c-sample/cmake-build-viewer/pub \
+  -A south-publisher \
+  -c sample/c-sample/config-region-south.json5
+```
+
 node_cは `region_name=classroom-south` がGatewayのSouthフィルターに一致するため、Southとして扱われます。
 
 端末Bに次のような受信結果が表示されれば成功です。
@@ -164,6 +184,17 @@ node_cは `region_name=classroom-south` がGatewayのSouthフィルターに一�
 ```text
 >> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   0] Pub from C!')
 ```
+
+### Viewerでの見え方
+
+![Gatewayを介したNorth RegionとSouth Region](images/topology/05-regions-north-south.png)
+
+North側とSouth側のPeerは直接接続せず、中央のGatewayへ1本ずつTCP linkを
+確立しています。中央のGatewayは`zenohd`として起動していてTopology Agentを
+attachしていないため、表示名ではなく短縮ZIDがラベルになります。
+
+Viewerの線はRegion階層やデータ配送方向を表しません。この図は、2つのPeerが
+同じGatewayへ接続している物理的なsession構成を示します。
 
 確認後、PublisherとSubscriberをそれぞれ `Ctrl-C` で停止します。Gatewayは起動したままにします。
 
@@ -178,6 +209,14 @@ cd /root/workspace
 ./sample/c-sample/cmake-build/sub -c sample/c-sample/config-region-south.json5
 ```
 
+Viewer併用時:
+
+```bash
+./sample/c-sample/cmake-build-viewer/sub \
+  -A south-subscriber \
+  -c sample/c-sample/config-region-south.json5
+```
+
 端末Bの `node_b` でNorth側Publisherを起動します。
 
 ```bash
@@ -185,7 +224,18 @@ cd /root/workspace
 ./sample/c-sample/cmake-build/pub -c sample/c-sample/config-region-north.json5
 ```
 
+Viewer併用時:
+
+```bash
+./sample/c-sample/cmake-build-viewer/pub \
+  -A north-publisher \
+  -c sample/c-sample/config-region-north.json5
+```
+
 端末Cに受信結果が表示されれば成功です。North／SouthはRegion階層上の親子関係であり、データの流れる方向ではありません。
+
+PublisherとSubscriberを入れ替えてもsession構成は変わらないため、Viewerには
+上と同じ3ノード、2 linkの図が表示されます。
 
 確認後、Publisher、Subscriber、Gatewayの順に、それぞれの端末で `Ctrl-C` を押します。
 

@@ -5,6 +5,10 @@
 - `node_a`: `172.30.0.10`
 - `node_b`: `172.30.0.11`
 
+Topology Viewerを併用する場合は、先に[第6章](06-viewer-setup.md)の準備と
+Launcher起動を行ってください。各操作には通常版とViewer併用版のコマンドを
+併記しています。
+
 ## Zenohのmodeとネットワーク構成
 
 Zenohの `peer`、`client`、`router` は、単なるプロセスの役割名ではありません。各Zenohノードがどのように他のノードを発見・接続し、どの通信モデルを構成するかを選択するmodeです。
@@ -34,6 +38,15 @@ cd /root/workspace
 ./sample/c-sample/cmake-build/sub --mode peer -l tcp/172.30.0.11:7446
 ```
 
+Viewer併用時:
+
+```bash
+./sample/c-sample/cmake-build-viewer/sub \
+  -A node_b-sub \
+  --mode peer \
+  -l tcp/172.30.0.11:7446
+```
+
 ### Publisher
 
 端末Bで `node_a` に接続し、`node_b` のTCPエンドポイントを指定します。
@@ -47,7 +60,25 @@ cd /root/workspace
 ./sample/c-sample/cmake-build/pub --mode client -e tcp/172.30.0.11:7446
 ```
 
-端末Aに受信結果が表示されれば成功です。確認後、両方の端末で `Ctrl-C` を押します。
+Viewer併用時:
+
+```bash
+./sample/c-sample/cmake-build-viewer/pub \
+  -A node_a-pub \
+  --mode client \
+  -e tcp/172.30.0.11:7446
+```
+
+端末Aに受信結果が表示されれば成功です。
+
+### Viewerでの見え方
+
+![node_aからnode_bへの明示TCP接続](images/topology/03-two-nodes-explicit-tcp.png)
+
+`node_a-pub`はclient、`node_b-sub`はpeerとして表示され、その間に明示した
+1本のTCP linkがあります。図形の位置はコンテナやIPアドレスの位置を表しません。
+
+確認後、両方の端末で `Ctrl-C` を押します。
 
 ## 2. UDP通信
 
@@ -60,6 +91,15 @@ cd /root/workspace
 ./sample/c-sample/cmake-build/sub --mode peer -l udp/172.30.0.11:7446
 ```
 
+Viewer併用時:
+
+```bash
+./sample/c-sample/cmake-build-viewer/sub \
+  -A node_b-sub \
+  --mode peer \
+  -l udp/172.30.0.11:7446
+```
+
 ### Publisher
 
 端末Bの `node_a` からUDPエンドポイントへ接続します。
@@ -69,7 +109,25 @@ cd /root/workspace
 ./sample/c-sample/cmake-build/pub --mode client -e udp/172.30.0.11:7446
 ```
 
-端末Aに受信結果が表示されれば成功です。確認後、両方の端末で `Ctrl-C` を押します。
+Viewer併用時:
+
+```bash
+./sample/c-sample/cmake-build-viewer/pub \
+  -A node_a-pub \
+  --mode client \
+  -e udp/172.30.0.11:7446
+```
+
+端末Aに受信結果が表示されれば成功です。
+
+### Viewerでの見え方
+
+![node_aからnode_bへの明示UDP接続](images/topology/03-two-nodes-explicit-udp.png)
+
+TCPの場合と同じ2ノード間が、今度は1本のUDP linkで接続されています。プロトコルは
+線の`udp`ラベルと、線をクリックしたときのDetailsで確認できます。
+
+確認後、両方の端末で `Ctrl-C` を押します。
 
 ## 3. マルチキャスト探索で通信する
 
@@ -82,6 +140,14 @@ cd /root/workspace
 ./sample/c-sample/cmake-build/sub -c sample/c-sample/config-multicast.json
 ```
 
+Viewer併用時:
+
+```bash
+./sample/c-sample/cmake-build-viewer/sub \
+  -A node_b-sub \
+  -c sample/c-sample/config-multicast.json
+```
+
 端末Bの `node_a`:
 
 ```bash
@@ -89,7 +155,24 @@ cd /root/workspace
 ./sample/c-sample/cmake-build/pub -c sample/c-sample/config-multicast.json
 ```
 
-受信できることを確認し、両方の端末で `Ctrl-C` を押します。
+Viewer併用時:
+
+```bash
+./sample/c-sample/cmake-build-viewer/pub \
+  -A node_a-pub \
+  -c sample/c-sample/config-multicast.json
+```
+
+受信できることを確認します。
+
+### Viewerでの見え方
+
+![node_aとnode_bのマルチキャスト探索後の接続](images/topology/03-two-nodes-multicast.png)
+
+マルチキャストで発見した2つのPeer間に、TCP linkが2本表示されています。これは
+次節で説明するように、両Peerがそれぞれ相手への接続を開始した結果です。
+
+確認後、両方の端末で `Ctrl-C` を押します。
 
 ### ViewerでTCP linkが2本見える理由
 

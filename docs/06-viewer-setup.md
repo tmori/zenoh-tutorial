@@ -127,60 +127,26 @@ Hakoniwa Coreと `hako-cmd` は使用しません。
 ホストのブラウザで <http://localhost:5173> を開き、**Connect**を押します。
 この時点では観測対象のZenoh sessionがないため、ノードは表示されません。
 
-## 5. 通常演習と一緒にTopologyを表示する
+![観測対象がまだないTopology Viewer](images/topology/06-viewer-empty.png)
 
-第2章以降の既存コマンドで、実行ファイルを`cmake-build-viewer`版へ置き換え、
-`-A <表示名>`を追加します。ZenohのJSON設定、`--mode`、`-e`などは変更しません。
+接続直後に`connected`、`0 nodes`、`0 links`と表示されれば、Aggregatorから
+ブラウザまでの経路は正常です。この後、Viewer対応版のPub/Subを起動すると
+ノードと線が追加されます。
 
-```text
-通常:
-  cmake-build/pub <既存のオプション>
-  cmake-build/sub <既存のオプション>
+## 5. 演習を開始する
 
-Topology表示あり:
-  cmake-build-viewer/pub -A <表示名> <同じオプション>
-  cmake-build-viewer/sub -A <表示名> <同じオプション>
-```
+以上でViewerのセットアップは完了です。実際に入力するViewer併用版コマンドと、
+そのとき表示される実測画面は各演習の手順内に記載しています。
 
-例えば、第2章のマルチキャストPub/Subを表示する場合は、それぞれ別の端末で
-次を実行します。
+- [第2章: 同一コンテナ内のPub/Sub](02-pub-sub.md)
+- [第3章: 同一ネットワーク内の通信](03-network.md)
+- [第4章: Zenoh Routerを介した通信](04-router.md)
+- [第5章: Regionsによるネットワークの階層化](05-region.md)
 
-node_a:
+通常版だけを試す場合は各手順の通常コマンドを、接続構成も同時に見る場合は
+その直後にある「Viewer併用時」のコマンドを実行してください。
 
-```bash
-docker compose exec node_a bash
-cd /root/workspace/zenoh-tutorial/sample/c-sample
-./cmake-build-viewer/sub \
-  -A node_a-sub \
-  -c config-multicast.json
-```
-
-node_b:
-
-```bash
-docker compose exec node_b bash
-cd /root/workspace/zenoh-tutorial/sample/c-sample
-./cmake-build-viewer/pub \
-  -A node_b-pub \
-  -c config-multicast.json
-```
-
-Viewerは起動したAgentを動的に認識し、`-A`に指定した名前をノードへ表示します。
-完全なZenoh IDはDetailsの`zid`で確認できます。`node_c`からAggregatorへの
-接続設定もDocker Composeが与えるため、追加指定は不要です。
-
-同じコンテナで複数のsessionを起動する場合は、それぞれ異なる表示名を付けると
-区別しやすくなります。同じ名前を指定しても内部ではZIDで区別され、Viewerが
-短縮ZIDを名前へ補います。
-
-## 6. staleと復旧を確認する
-
-`-A <表示名>`を付けて起動した任意のサンプルを`Ctrl-C`で停止し、5秒以上待つと、
-そのAgentが`stale`になります。この更新では既存グラフ全体を再配置せず、
-変更された状態だけを反映します。同じコマンドを再実行すると`connected`へ
-復旧します。
-
-## 7. 演習を終了する
+## 6. 演習を終了する
 
 ホストの `workspace/zenoh-tutorial` ディレクトリでDocker Compose環境全体を終了します。
 Launcherや各プロセスを個別に停止する必要はありません。
@@ -204,14 +170,18 @@ docker compose \
   down
 ```
 
-## 8. 注意点
+## 7. 注意点
 
 - `-A <表示名>`または`--topology-agent <表示名>`を指定したときだけTopology Agentが動作します
 - Aggregatorが動作していなくても、通常のZenoh pub/sub処理は継続します
 - ブラウザ表示は毎秒更新されますが、ノードとリンクに変更がなければ
   グラフ全体を再配置しません
+- Viewer対応サンプルを停止して5秒以上経過すると、そのAgentは`stale`表示になり、
+  同じコマンドを再実行すると新しいsessionへ更新されます
+- 同じ表示名を複数のsessionへ指定しても内部ではZIDで区別され、Viewerが
+  短縮ZIDをラベルへ補います
 
-## 9. 図とDetailsの読み方
+## 8. 図とDetailsの読み方
 
 丸やひし形、線、`tcp` ラベル、件数、クリック時に表示される
 Detailsの各フィールドについては、次のガイドを参照してください。
@@ -221,3 +191,6 @@ Detailsの各フィールドについては、次のガイドを参照してく�
 線はノード間の接続関係を表し、方向を持ちません。PublisherからSubscriberへの
 データ配送方向やclient／serverの関係は表しません。実際にそのlinkを観測した
 Agentは、Detailsの `raw.observed_by` で確認できます。
+
+講義資料用PNGの対応する演習と更新方法は、
+[Topology Viewer画像の更新手順](maintenance/viewer-screenshots.md)にまとめています。

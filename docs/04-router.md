@@ -24,6 +24,10 @@ Client同士が直接sessionを確立するのではなく、3つのClientが共
 Entry Pointとして利用し、Routerがkey expressionに基づいてデータを中継する
 構成を確認します。
 
+Topology Viewerを併用する場合は、先に[第6章](06-viewer-setup.md)の準備と
+Launcher起動を行ってください。各Clientには通常版とViewer併用版のコマンドを
+併記しています。`zenohd`のコマンドは通常版と共通です。
+
 ## 1. TCPでZenoh Routerを利用する
 
 4つの端末を使用します。
@@ -55,6 +59,15 @@ cd /root/workspace
 ./sample/c-sample/cmake-build/sub --mode client -e tcp/172.40.0.10:7446
 ```
 
+Viewer併用時:
+
+```bash
+./sample/c-sample/cmake-build-viewer/sub \
+  -A client-b \
+  --mode client \
+  -e tcp/172.40.0.10:7446
+```
+
 ### Client A: Publisher
 
 端末Cで `node_a` に接続し、Client AをPublisherとして起動します。
@@ -66,6 +79,16 @@ docker exec -it node_a bash
 ```bash
 cd /root/workspace
 ./sample/c-sample/cmake-build/pub --mode client \
+  -e tcp/172.40.0.10:7446 \
+  -p "Pub from Client A!"
+```
+
+Viewer併用時:
+
+```bash
+./sample/c-sample/cmake-build-viewer/pub \
+  -A client-a \
+  --mode client \
   -e tcp/172.40.0.10:7446 \
   -p "Pub from Client A!"
 ```
@@ -88,6 +111,16 @@ cd /root/workspace
   -p "Pub from Client C!"
 ```
 
+Viewer併用時:
+
+```bash
+./sample/c-sample/cmake-build-viewer/pub \
+  -A client-c \
+  --mode client \
+  -e tcp/172.40.0.10:7446 \
+  -p "Pub from Client C!"
+```
+
 端末Bに、Client AとClient Cからの受信結果が交互に表示されることを確認します。
 
 ```text
@@ -98,6 +131,15 @@ cd /root/workspace
 これで、異なるサブネットに配置されたClient A／Bと、Routerと同じ
 `node_c`で動くClient Cが、共通のZenoh Routerを介して通信できることを
 確認できます。
+
+### Viewerでの見え方
+
+![3つのClientをTCP Routerへ接続したスター構成](images/topology/04-router-tcp-star.png)
+
+3つのClientは互いに直接接続せず、中央のRouterへ1本ずつTCP linkを確立します。
+そのため、4ノード、3 transport、3 linkのスター構成になります。中央のオレンジ色の
+ひし形がRouterです。`zenohd`自身にはTopology Agentをattachしていないため、
+Routerのラベルには指定名ではなく短縮ZIDが表示されます。
 
 確認後、Client A、Client C、Client B、Zenoh Routerの順に、それぞれの端末で
 `Ctrl-C`を押します。
@@ -119,11 +161,30 @@ cd /root/workspace
 ./sample/c-sample/cmake-build/sub --mode client -e udp/172.40.0.10:7446
 ```
 
+Viewer併用時:
+
+```bash
+./sample/c-sample/cmake-build-viewer/sub \
+  -A client-b \
+  --mode client \
+  -e udp/172.40.0.10:7446
+```
+
 端末Cの `node_a` でClient AをPublisherとして起動します。
 
 ```bash
 cd /root/workspace
 ./sample/c-sample/cmake-build/pub --mode client \
+  -e udp/172.40.0.10:7446 \
+  -p "Pub from Client A!"
+```
+
+Viewer併用時:
+
+```bash
+./sample/c-sample/cmake-build-viewer/pub \
+  -A client-a \
+  --mode client \
   -e udp/172.40.0.10:7446 \
   -p "Pub from Client A!"
 ```
@@ -137,8 +198,26 @@ cd /root/workspace
   -p "Pub from Client C!"
 ```
 
+Viewer併用時:
+
+```bash
+./sample/c-sample/cmake-build-viewer/pub \
+  -A client-c \
+  --mode client \
+  -e udp/172.40.0.10:7446 \
+  -p "Pub from Client C!"
+```
+
 端末Bに、Client AとClient Cからの受信結果が交互に表示されれば、3つのClientを
 Zenoh Routerへ接続したUDP通信は成功です。
+
+### Viewerでの見え方
+
+![3つのClientをUDP Routerへ接続したスター構成](images/topology/04-router-udp-star.png)
+
+接続構造はTCPの場合と同じスター型ですが、3本の線のラベルが`udp`になります。
+Publisher／Subscriberの役割ではなく、各Clientが共通のRouterとsessionを
+確立していることを図から確認できます。
 
 確認後、Client A、Client C、Client B、Zenoh Routerの順に、それぞれの端末で
 `Ctrl-C`を押します。
