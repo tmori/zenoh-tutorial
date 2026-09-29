@@ -127,6 +127,16 @@ sed -n '1,200p' sample/c-sample/config-region-gateway.json5
 zenohd -c sample/c-sample/config-region-gateway.json5
 ```
 
+起動に成功すると、Gatewayの待受Endpointが表示されます。
+
+```text
+zenohd v1.10.1 built with rustc ...
+Zenoh can be reached at: tcp/172.30.0.10:7446
+```
+
+`Zenoh can be reached at` は、GatewayがNorth側の `node_a` で待受を開始し、
+North／SouthのPeerからsession接続を受け付けられる状態になったことを示します。
+
 このGatewayは `mode=peer` で、TCPの `172.30.0.10:7446` を待ち受けます。接続相手の `region_name` が `classroom-south` の場合、その接続を1つ目のSouth Regionへ分類します。
 
 ## 5. SouthからNorthへのPub/Sub
@@ -166,7 +176,8 @@ docker exec -it node_c bash
 
 ```bash
 cd /root/workspace
-./sample/c-sample/cmake-build/pub -c sample/c-sample/config-region-south.json5
+./sample/c-sample/cmake-build/pub -c sample/c-sample/config-region-south.json5 \
+  -p "Pub from South!"
 ```
 
 Viewer併用時:
@@ -174,16 +185,25 @@ Viewer併用時:
 ```bash
 ./sample/c-sample/cmake-build-viewer/pub \
   -A south-publisher \
-  -c sample/c-sample/config-region-south.json5
+  -c sample/c-sample/config-region-south.json5 \
+  -p "Pub from South!"
 ```
 
 node_cは `region_name=classroom-south` がGatewayのSouthフィルターに一致するため、Southとして扱われます。
 
-端末Bに次のような受信結果が表示されれば成功です。
+端末BのNorth側Subscriberに、South側Publisherからの受信結果が表示されることを確認します。
 
 ```text
->> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   0] Pub from C!')
+Opening session...
+Declaring Subscriber on 'demo/example/**'...
+Press CTRL-C to quit...
+>> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   0] Pub from South!')
+>> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   1] Pub from South!')
+>> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   2] Pub from South!')
 ```
+
+`Pub from South!` がNorth側で受信されることは、`classroom-south` に分類された
+node_cから、Gatewayを越えてNorth側のnode_bへデータを配送できたことを示します。
 
 ### Viewerでの見え方
 
@@ -221,7 +241,8 @@ Viewer併用時:
 
 ```bash
 cd /root/workspace
-./sample/c-sample/cmake-build/pub -c sample/c-sample/config-region-north.json5
+./sample/c-sample/cmake-build/pub -c sample/c-sample/config-region-north.json5 \
+  -p "Pub from North!"
 ```
 
 Viewer併用時:
@@ -229,10 +250,23 @@ Viewer併用時:
 ```bash
 ./sample/c-sample/cmake-build-viewer/pub \
   -A north-publisher \
-  -c sample/c-sample/config-region-north.json5
+  -c sample/c-sample/config-region-north.json5 \
+  -p "Pub from North!"
 ```
 
-端末Cに受信結果が表示されれば成功です。North／SouthはRegion階層上の親子関係であり、データの流れる方向ではありません。
+端末CのSouth側Subscriberに、North側Publisherからの受信結果が表示されることを確認します。
+
+```text
+Opening session...
+Declaring Subscriber on 'demo/example/**'...
+Press CTRL-C to quit...
+>> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   0] Pub from North!')
+>> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   1] Pub from North!')
+>> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   2] Pub from North!')
+```
+
+`Pub from North!` がSouth側で受信されることは、North／SouthがRegion階層上の
+親子関係であり、データの流れる方向を制限しないことを示します。
 
 PublisherとSubscriberを入れ替えてもsession構成は変わらないため、Viewerには
 上と同じ3ノード、2 linkの図が表示されます。
