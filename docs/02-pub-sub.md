@@ -58,13 +58,7 @@ Viewer併用時:
   -c sample/c-sample/config-multicast.json
 ```
 
-端末Aに次のような受信結果が繰り返し表示されれば成功です。
-
-```text
->> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   0] Pub from C!')
-```
-
-実測では、Subscriberの起動時とその後の受信は次のようになります。
+端末AのSubscriberに、起動時のメッセージと受信結果が表示されることを確認します。
 
 ```text
 Opening session...

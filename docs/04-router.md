@@ -131,14 +131,7 @@ Viewer併用時:
   -p "Pub from Client C!"
 ```
 
-端末Bに、Client AとClient Cからの受信結果が交互に表示されることを確認します。
-
-```text
->> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   0] Pub from Client A!')
->> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   0] Pub from Client C!')
-```
-
-実際には、Subscriberの起動直後に次のような出力が続きます。
+端末BのSubscriberに、Client AとClient Cからの受信結果が表示されることを確認します。
 
 ```text
 Opening session...
@@ -236,7 +229,7 @@ Viewer併用時:
   -p "Pub from Client C!"
 ```
 
-端末Bに、Client AとClient Cからの受信結果が交互に表示されれば、3つのClientを
+端末BのSubscriberがClient AとClient Cの両方から受信できれば、3つのClientを
 Zenoh Routerへ接続したUDP通信は成功です。
 
 ### 成功時の出力例（macOS / Docker Desktop）
