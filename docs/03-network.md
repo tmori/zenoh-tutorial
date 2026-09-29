@@ -71,6 +71,33 @@ Viewer併用時:
 
 端末Aに受信結果が表示されれば成功です。
 
+### 成功時の出力例（macOS / Docker Desktop）
+
+`node_b` のSubscriberには、次のように連続した受信結果が表示されます。
+
+```text
+Opening session...
+Declaring Subscriber on 'demo/example/**'...
+Press CTRL-C to quit...
+>> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   0] Pub from C!')
+>> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   1] Pub from C!')
+>> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   2] Pub from C!')
+```
+
+Publisher側にも、対応する `Putting Data` が表示されます。
+
+```text
+Opening session...
+Declaring Publisher on 'demo/example/zenoh-c-pub'...
+Press CTRL-C to quit...
+Putting Data ('demo/example/zenoh-c-pub': '[   0] Pub from C!')...
+```
+
+`Received PUT` は、`node_a` のClientが `-e` で指定した `node_b` のPeerへ
+TCP接続でき、key expression `demo/example/zenoh-c-pub` のデータが
+Subscriberまで配送されたことを示します。`[   0]` などの連番や表示回数は、
+停止するまでの時間により変わります。
+
 ### Viewerでの見え方
 
 ![node_aからnode_bへの明示TCP接続](images/topology/03-two-nodes-explicit-tcp.png)
@@ -120,6 +147,23 @@ Viewer併用時:
 
 端末Aに受信結果が表示されれば成功です。
 
+### 成功時の出力例（macOS / Docker Desktop）
+
+UDPでもSubscriber側に同じ形式の受信結果が表示されます。
+
+```text
+Opening session...
+Declaring Subscriber on 'demo/example/**'...
+Press CTRL-C to quit...
+>> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   0] Pub from C!')
+>> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   1] Pub from C!')
+>> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   2] Pub from C!')
+```
+
+この結果は、Clientが `udp/172.30.0.11:7446` を接続先として使い、
+`node_b` のPeerが受信・配送できたことを示します。TCP節と同じアプリケーション
+メッセージが表示されますが、この節ではZenohのtransport linkがUDPです。
+
 ### Viewerでの見え方
 
 ![node_aからnode_bへの明示UDP接続](images/topology/03-two-nodes-explicit-udp.png)
@@ -164,6 +208,24 @@ Viewer併用時:
 ```
 
 受信できることを確認します。
+
+### 成功時の出力例（macOS / Docker Desktop）
+
+`-e` や `-l` を指定しなくても、`node_b` のSubscriberに受信結果が表示されます。
+
+```text
+Opening session...
+Declaring Subscriber on 'demo/example/**'...
+Press CTRL-C to quit...
+>> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   0] Pub from C!')
+>> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   1] Pub from C!')
+>> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   2] Pub from C!')
+```
+
+これは、両Peerが `config-multicast.json` の設定に従って同一ネットワーク内で
+相手を発見し、Zenohの通信linkを自動的に確立できたことを示します。受信内容は
+TCP・UDPの明示接続と同じですが、接続先Endpointをコマンドラインで指定して
+いない点がこの節の確認対象です。
 
 ### Viewerでの見え方
 
