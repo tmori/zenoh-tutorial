@@ -44,6 +44,16 @@ docker exec -it node_c bash
 zenohd -l tcp/172.40.0.10:7446
 ```
 
+起動に成功すると、次のように待受Endpointが表示されます。
+
+```text
+zenohd v1.10.1 built with rustc ...
+Zenoh can be reached at: tcp/172.40.0.10:7446
+```
+
+`Zenoh can be reached at` は、Routerが指定したTCP Endpointで待受を開始し、
+Clientからのsession接続を受け付けられる状態になったことを示します。
+
 この端末はZenoh Routerの実行に使うため、そのままにしておきます。
 
 ### Client B: Subscriber
@@ -128,6 +138,24 @@ Viewer併用時:
 >> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   0] Pub from Client C!')
 ```
 
+実際には、Subscriberの起動直後に次のような出力が続きます。
+
+```text
+Opening session...
+Declaring Subscriber on 'demo/example/**'...
+Press CTRL-C to quit...
+>> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   0] Pub from Client A!')
+>> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   1] Pub from Client A!')
+>> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   0] Pub from Client C!')
+>> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   1] Pub from Client C!')
+```
+
+`Client A` はRouterとは別サブネットの `node_a`、`Client C` はRouterと同じ
+`node_c` で動いています。両方のメッセージをClient Bが受信できることは、
+3つのClientが互いに直接接続せず、共通のRouterを経由してkey expressionに一致する
+データを配送できたことを示します。各Publisherを開始した時刻により、表示順は
+この例と入れ替わることがあります。
+
 これで、異なるサブネットに配置されたClient A／Bと、Routerと同じ
 `node_c`で動くClient Cが、共通のZenoh Routerを介して通信できることを
 確認できます。
@@ -210,6 +238,30 @@ Viewer併用時:
 
 端末Bに、Client AとClient Cからの受信結果が交互に表示されれば、3つのClientを
 Zenoh Routerへ接続したUDP通信は成功です。
+
+### 成功時の出力例（macOS / Docker Desktop）
+
+RouterはUDP Endpointで待受を開始します。
+
+```text
+Zenoh can be reached at: udp/172.40.0.10:7446
+```
+
+Client BのSubscriberには、TCPの場合と同様に両Publisherのデータが届きます。
+
+```text
+Opening session...
+Declaring Subscriber on 'demo/example/**'...
+Press CTRL-C to quit...
+>> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   0] Pub from Client A!')
+>> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   1] Pub from Client A!')
+>> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   0] Pub from Client C!')
+>> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   1] Pub from Client C!')
+```
+
+これは、3つのClientとRouter間のtransport linkがUDPであっても、Routerが
+key expressionに基づいてClient A／CからClient Bへデータを中継できることを
+示します。メッセージの表示順はPublisherの起動タイミングに依存します。
 
 ### Viewerでの見え方
 
@@ -329,6 +381,18 @@ Subscriber Client
 ## 4. RouterをEntry Pointとして利用する意味を確認する
 
 Zenoh Routerを停止した状態で、同じclient設定のまま `pub` と `sub` だけを実行すると、データを交換できません。両方のclientが接続先として指定している `172.40.0.10:7446` のZenoh Routerが存在しないためです。
+
+例えば、Routerを停止してから第1節のClient Bのコマンドを実行すると、次のように
+sessionを開けず終了します。
+
+```text
+Opening session...
+Error opening session: Unable to connect to any of [Single(tcp/172.40.0.10:7446)]!
+Unable to open session!
+```
+
+これはPublisherとSubscriberが直接通信できないことを示すのではなく、両Clientが
+明示的に指定した共通の接続先（Router）が存在しないことを示す期待どおりの結果です。
 
 一方、`node_a`／`node_b` と `node_c` はIPユニキャストでは到達できます。そのため、Peer同士で `connect` と `listen` のEndpointを明示すれば、Zenoh Routerを使わずに通信することもできます。
 
