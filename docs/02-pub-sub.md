@@ -64,6 +64,20 @@ Viewer併用時:
 >> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   0] Pub from C!')
 ```
 
+実測では、Subscriberの起動時とその後の受信は次のようになります。
+
+```text
+Opening session...
+Declaring Subscriber on 'demo/example/**'...
+Press CTRL-C to quit...
+>> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   0] Pub from C!')
+>> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   1] Pub from C!')
+```
+
+`Opening session` と `Declaring Subscriber` はローカルのZenoh sessionと購読の
+作成成功を示します。`Received PUT` が連続して表示されれば、探索で相手を発見し、
+Publisherからのデータ配送まで完了しています。番号と送信間隔は実行環境で変わります。
+
 ### Viewerでの見え方
 
 ![同一コンテナでマルチキャスト探索したPub/Sub](images/topology/02-same-container-multicast.png)
@@ -110,6 +124,19 @@ Viewer併用時:
 
 明示的な接続先もなく、マルチキャスト探索も無効なため、Subscriberにはデータが届きません。
 
+#### 期待する出力
+
+Subscriberには起動直後の次の3行だけが表示され、`Received PUT` は表示されません。
+
+```text
+Opening session...
+Declaring Subscriber on 'demo/example/**'...
+Press CTRL-C to quit...
+```
+
+Publisher側には `Putting Data (...)` が繰り返し表示されます。これはPublisherが
+送信を試みていることを示しますが、発見も明示接続もないため配送先はありません。
+
 ### Viewerでの見え方
 
 ![マルチキャストも明示接続もないPub/Sub](images/topology/02-same-container-no-multicast.png)
@@ -155,6 +182,21 @@ Viewer併用時:
 ```
 
 端末Aに受信結果が表示されれば成功です。
+
+#### 成功時の出力例
+
+```text
+Opening session...
+Declaring Subscriber on 'demo/example/**'...
+Press CTRL-C to quit...
+>> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   0] Pub from C!')
+>> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   1] Pub from C!')
+>> [Subscriber] Received PUT ('demo/example/zenoh-c-pub': '[   2] Pub from C!')
+```
+
+この場合は探索に依存していません。Subscriberの `listen` とPublisherの `connect` が
+同じUDPエンドポイントを指すため、`Received PUT` が表示されれば明示した経路での
+通信成功です。
 
 ### Viewerでの見え方
 

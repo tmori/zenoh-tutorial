@@ -96,6 +96,39 @@ docker exec node_c ping -c 3 172.30.0.10
 docker exec node_c ping -c 3 172.30.0.11
 ```
 
+### 成功時の出力例（macOS / Docker Desktop）
+
+同じネットワーク内の通信では、次のように3回とも応答し、最後に
+`0% packet loss` が表示されます。
+
+```text
+$ docker exec node_a ping -c 3 172.30.0.11
+64 bytes from 172.30.0.11: icmp_seq=1 ttl=64 time=0.106 ms
+64 bytes from 172.30.0.11: icmp_seq=2 ttl=64 time=0.054 ms
+64 bytes from 172.30.0.11: icmp_seq=3 ttl=64 time=0.232 ms
+
+--- 172.30.0.11 ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss
+```
+
+別ネットワークの `node_c` 宛てでも成功します。ただし `ttl=63` となる
+点が異なります。
+
+```text
+$ docker exec node_a ping -c 3 172.40.0.10
+64 bytes from 172.40.0.10: icmp_seq=1 ttl=63 time=0.112 ms
+64 bytes from 172.40.0.10: icmp_seq=2 ttl=63 time=0.310 ms
+64 bytes from 172.40.0.10: icmp_seq=3 ttl=63 time=0.300 ms
+
+--- 172.40.0.10 ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss
+```
+
+`ttl` はルータを1回通るたびに1減ります。したがって、同一ネットワークの
+`node_a → node_b` は `ttl=64`、`node_r` を通る
+`node_a → node_c` は `ttl=63` です。残り4コマンドも同様に、
+`0% packet loss` と、同一／別ネットワークに対応したTTLを確認します。
+
 6コマンドすべてが `0% packet loss` になれば、次の経路で双方向の
 ユニキャスト通信ができています。
 
@@ -115,6 +148,19 @@ routeを確認してください。
 ```bash
 docker exec node_r ip -br addr
 ```
+
+### 成功時の出力例
+
+```text
+$ docker exec node_r ip -br addr
+lo               UNKNOWN        127.0.0.1/8
+eth0@if9         UP             172.30.0.254/16
+eth1@if11        UP             172.40.0.254/16
+```
+
+`@if9` の番号はDocker内部のインターフェース番号なので環境ごとに変わります。
+重要なのは、`eth0` と `eth1` がともに `UP` で、それぞれの想定IPアドレスを
+持つことです。
 
 通常は次の対応になります。異なる場合は、以降の `eth0` と `eth1` を実際の
 インターフェース名へ読み替えてください。
@@ -147,6 +193,20 @@ docker exec node_b tcpdump -i eth0 -nn -c 3 \
 `172.30.0.10` からのUDPパケットが3件表示されます。`node_a` と `node_b` は
 同じ `local_net_1` にいるため、マルチキャストを直接受信できます。
 
+#### 成功時の出力例
+
+```text
+$ docker exec node_b tcpdump -i eth0 -nn -c 3 'udp and dst 224.0.0.224 and port 7446'
+listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+3 packets captured
+172.30.0.10.51895 > 224.0.0.224.7446: UDP, length 5
+172.30.0.10.60071 > 224.0.0.224.7446: UDP, length 5
+172.30.0.10.34024 > 224.0.0.224.7446: UDP, length 5
+```
+
+送信元ポート番号は毎回変わります。送信元IPが `172.30.0.10`、宛先が
+`224.0.0.224.7446`、そして `3 packets captured` であることを確認します。
+
 ### `node_r` の受信側で確認する
 
 `local_net_1` 側の `eth0` を監視します。
@@ -169,6 +229,21 @@ docker exec node_r timeout 5 tcpdump -i eth1 -nn \
 
 パケットが表示されないことを確認します。`node_r` はユニキャストIPパケットを
 転送しますが、現在の設定ではマルチキャストを別ネットワークへ転送しません。
+
+#### 成功時の出力例
+
+```text
+$ docker exec node_r timeout 5 tcpdump -i eth1 -nn 'udp and dst 224.0.0.224 and port 7446'
+listening on eth1, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+
+0 packets captured
+0 packets received by filter
+0 packets dropped by kernel
+```
+
+ここでの成功は、パケットを受信しないことです。これは `node_r` が
+`local_net_1` のマルチキャストを `local_net_2` へルーティングしていないことを
+表します。`node_c` の確認も同じく `0 packets captured` になります。
 
 ### `node_c` で受信できないことを確認する
 
@@ -216,6 +291,26 @@ cmake --build build --config Release
 cmake --install build --config Release
 ```
 
+### 成功時の出力例
+
+CMakeの設定時には、次の値を確認します。
+
+```text
+-- project_version = 1.10.1
+-- ZENOHC_BUILD_WITH_SHARED_MEMORY = OFF
+-- ZENOHC_BUILD_WITH_UNSTABLE_API = ON
+-- CMAKE_INSTALL_PREFIX = /root/workspace/zenoh-c-install
+```
+
+初回はRustツールチェーンとcrateの取得・コンパイルが走るため、しばらく時間が
+かかります。完了後に同じ `cmake --install` を実行した場合は、次のように
+`libzenohc.so` が表示されればインストール済みです。
+
+```text
+-- Up-to-date: /root/workspace/zenoh-c-install/lib/libzenohc.so
+-- Up-to-date: /root/workspace/zenoh-c-install/lib/cmake/zenohc/zenohcConfig.cmake
+```
+
 ここでは後のTopology Viewer演習でも同じRustビルド成果物を再利用できる設定で
 ビルドします。通常のZenoh演習では、従来どおり安定APIだけを使用します。
 
@@ -224,6 +319,13 @@ cmake --install build --config Release
 ```bash
 ls -l /root/workspace/zenoh-c-install/lib/libzenohc.so
 ```
+
+```text
+$ ls -lh /root/workspace/zenoh-c-install/lib/libzenohc.so
+-rw-r--r-- 1 root root 16M ... /root/workspace/zenoh-c-install/lib/libzenohc.so
+```
+
+サイズや日時は環境で異なります。ファイルが存在することを成功条件にします。
 
 ## 7. 講義用サンプルのビルド
 
@@ -234,13 +336,31 @@ cd /root/workspace/sample/c-sample
 bash build.bash
 ```
 
+### 成功時の出力例
+
+```text
+-- ZENOH_C_LIBRARY_PATH: /root/workspace/zenoh-c-install/lib/libzenohc.so
+-- Build files have been written to: /root/workspace/sample/c-sample/cmake-build
+[ 50%] Built target pub
+[100%] Built target sub
+```
+
+ここで `ZENOH_C_LIBRARY_PATH` が前節でインストールした
+`libzenohc.so` を指していることを確認します。
+
 実行ファイルを確認します。
 
 ```bash
 ls -l cmake-build/pub cmake-build/sub
 ```
 
-`pub` と `sub` が表示されれば準備完了です。コンテナから一度抜けます。
+```text
+$ ls -l cmake-build/pub cmake-build/sub
+-rwxr-xr-x 1 root root ... cmake-build/pub
+-rwxr-xr-x 1 root root ... cmake-build/sub
+```
+
+実行権限付きの `pub` と `sub` が表示されれば準備完了です。コンテナから一度抜けます。
 
 ```bash
 exit
