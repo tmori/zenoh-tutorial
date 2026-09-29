@@ -79,6 +79,21 @@ docker compose \
   up -d --build
 ```
 
+起動後は、`node_a` にViewer用のポートが公開されていることを確認します。
+
+```bash
+docker compose port node_a 5173
+docker compose port node_a 8765
+```
+
+```text
+0.0.0.0:5173
+0.0.0.0:8765
+```
+
+`5173` はViewerのWeb UI、`8765` はTopology Bridge用のポートです。既存の
+Docker healthcheckの状態は、Viewerのポート公開の成否とは別に扱います。
+
 ## 3. Viewer環境を準備する
 
 `node_a` に入り、Hakoniwa Business PackのRecipeを使って必要な
@@ -93,12 +108,22 @@ install prefixへインストールされます。
 docker compose exec node_a bash
 cd /root/workspace/hakoniwa-business-pack
 
-python3 tools/recipe.py doctor \
+python3 tools/workspace.py run -- python3 tools/recipe.py doctor \
   --recipe recipes/examples/zenoh-tutorial-topology-viewer.yaml
-python3 tools/recipe.py plan \
+python3 tools/workspace.py run -- python3 tools/recipe.py plan \
   --recipe recipes/examples/zenoh-tutorial-topology-viewer.yaml
-python3 tools/recipe.py configure \
+python3 tools/workspace.py run -- python3 tools/recipe.py configure \
   --recipe recipes/examples/zenoh-tutorial-topology-viewer.yaml
+```
+
+初回の`doctor`ではFoundationが`MISSING`と表示されます。これは未構築であることを
+示す期待どおりの結果です。`configure`が完了すると、次のように表示されます。
+
+```text
+Topology Viewer smoke: PASS
+Recipe Launcher   : .../work/recipes/zenoh-tutorial-topology-viewer/config/launcher.json
+Foundation: SATISFIED
+[SATISFIED] Recipe runtime: .../config/launcher.json
 ```
 
 Viewer対応版のCサンプルをビルドします。
@@ -106,6 +131,12 @@ Viewer対応版のCサンプルをビルドします。
 ```bash
 cd /root/workspace/zenoh-tutorial/sample/c-sample
 ./build-viewer.bash
+```
+
+```text
+-- ZENOH_C_LIBRARY_PATH: .../foundation/install/lib/libzenohc.so
+[ 50%] Built target pub
+[100%] Built target sub
 ```
 
 通常版の `cmake-build/pub` と `cmake-build/sub` は変更されません。
@@ -117,12 +148,24 @@ Viewer対応版は `cmake-build-viewer` に生成されます。
 
 ```bash
 cd /root/workspace/hakoniwa-business-pack
-python3 tools/recipe.py launch \
+python3 tools/workspace.py run -- python3 tools/recipe.py launch \
   --recipe recipes/examples/zenoh-tutorial-topology-viewer.yaml
 ```
 
 このLauncherはBridge、Webサーバー、Aggregatorを起動します。
 Hakoniwa Coreと `hako-cmd` は使用しません。
+
+起動後は、ホストから次でWeb UIへの到達を確認できます。
+
+```bash
+curl -fsS -o /dev/null -w 'viewer_http=%{http_code}\n' http://localhost:5173/
+```
+
+```text
+viewer_http=200
+```
+
+HTTP 200はWeb UIが待受を開始したことを示します。
 
 ホストのブラウザで <http://localhost:5173> を開き、**Connect**を押します。
 この時点では観測対象のZenoh sessionがないため、ノードは表示されません。
