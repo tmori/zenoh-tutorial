@@ -238,23 +238,61 @@ TCP・UDPの明示接続と同じですが、接続先Endpointをコマンドラ
 
 ### ViewerでTCP linkが2本見える理由
 
-マルチキャストはPeerを発見するために使われ、発見後の通信にはTCP linkが
-確立されます。Zenoh 1.10のPeer向け既定値では、マルチキャストで発見した
-相手への `autoconnect_strategy` が `always` です。このため、相互到達可能な
-2つのPeerがそれぞれ接続を開始し、同じPeer間にTCP linkが2本できる場合が
-あります。
+マルチキャストScoutingは、同一L2ネットワーク上のZenohノードを発見するための
+UDPメッセージ交換です。これはZenoh sessionやTCP linkそのものではありません。
+各Peerは相手のHELLOを受け取ると、相手のmodeと自身の設定をもとに、接続を開始
+するかを**独立に**判断します。既定値の `always` では、相互到達可能な2つのPeerが
+ともに接続を開始するため、同じPeer間に2本のTCP linkが表示されることがあります。
 
 ```text
-Peer AがBを発見 -> AからBへTCP接続
-Peer BがAを発見 -> BからAへTCP接続
+Peer A: BのHELLOを受信 -> AからBへTCP接続を開始 -> TCP link 1
+Peer B: AのHELLOを受信 -> BからAへTCP接続を開始 -> TCP link 2
 ```
 
-どちらのTCP linkも双方向です。Publisher向け／Subscriber向けに1本ずつ、
-という意味ではありません。ViewerのDetailsで `src_endpoint` と
-`dst_endpoint` のポート番号の組が異なれば、別のTCP linkであることを確認できます。
+TCP connectionは全二重なので、link 1もlink 2も、確立後はA・Bのどちらからも
+送受信できます。そのため、2本は「Publisher用とSubscriber用」ではありません。
+ZenohではPublisherがpublicationを、Subscriberがinterestを宣言し、key expressionが
+一致するデータをZenohのrouting/transport層が配送します。アプリケーションは
+「このpublicationはlink 1、このsubscriptionはlink 2」のようには選択しません。
+また、各DATAがどちらのTCP linkを通るかは公開されたPub/Sub APIやScouting仕様では
+規定されません。利用可能なZenoh session/transportの内部状態に従う実装上の選択であり、
+Viewerのlinkの向きだけから個々のメッセージの経路を判断することはできません。
 
-重複接続を避けたい場合は、両Peerの `scouting.multicast` に次を設定すると、
-ZIDの大小関係により一方だけが接続を開始します。
+ViewerのDetailsで `src_endpoint` と `dst_endpoint` のポート番号の組が異なれば、
+別々に開始されたTCP connectionであることを確認できます。ただし両方とも全二重です。
+
+#### `scouting.multicast` と `autoconnect_strategy`
+
+この設定は、次のように `scouting.multicast` の配下に置きます。
+
+```json
+{
+  "scouting": {
+    "multicast": {
+      "enabled": true,
+      "address": "224.0.0.224:7446",
+      "autoconnect": { "peer": ["router", "peer"] },
+      "autoconnect_strategy": {
+        "peer": {
+          "to_router": "always",
+          "to_peer": "greater-zid"
+        }
+      }
+    }
+  }
+}
+```
+
+- `enabled`、`address`、`interface`、`listen` は、UDPマルチキャストScoutingを
+  どこで実施するかを指定します。
+- `autoconnect` は、発見した相手のmodeに対して自動接続を試みるかを指定します。
+  この教材のPeerでは、RouterとPeerが対象です。
+- `autoconnect_strategy` は、試みると決めた接続を**どちらの側が開始するか**の方針です。
+  これはPublisher/Subscriberの役割や、TCP接続確立後のデータ配送経路を指定する設定では
+  ありません。
+
+重複接続を避けるには、両Peerで `to_peer` を `greater-zid` にします。各Peerは自身の
+ZIDが相手より大きいときだけ接続を開始するため、2つのPeer間では一方だけが開始します。
 
 ```json
 "autoconnect_strategy": {
@@ -265,9 +303,33 @@ ZIDの大小関係により一方だけが接続を開始します。
 }
 ```
 
-ただし `greater-zid` は、NATなどにより片方向からしか接続できない構成には
-適さない場合があります。この演習ではZenohの既定動作を観察するため、
-`always`のままにしています。
+#### `greater-zid` の到達性による副作用
+
+NATやファイアウォールにより、新規TCP接続を開始できる向きが一方向だけになることが
+あります。ここでの注意点は、TCP linkを二重化できるかどうかではありません。
+BからAへのTCP connectionが1本でも確立すれば、TCPは全二重なのでA・Bの双方が
+そのconnectionでデータを送受信できます。
+
+```text
+B（NAT配下、private IP） -- TCP接続を開始 --> A（public IP）
+A -- TCP接続を開始 --> B  は失敗
+
+B → A が確立した後は、1本のTCP connectionをA・Bの双方で送受信できる
+```
+
+問題は、`greater-zid` がZIDの大小だけで接続開始者を1つに決める点です。
+発見などにより相手のEndpointを得られているとしても、接続開始を担当する側が
+到達できない側に選ばれると、唯一成功可能な接続試行まで行われません。
+
+| ZIDの大小 | 接続を開始するPeer | 接続結果 | 理由 |
+| --- | --- | --- | --- |
+| AのZID > BのZID | A | 失敗 | A → B はNATにより開始できない。Bは小さいZID側なので接続を開始しない。 |
+| BのZID > AのZID | B | 成功 | B → A は外向き接続として開始できる。 |
+
+`always` なら両者が接続を試みるため、A → B が失敗してもB → A が成功すれば
+1本のTCP connectionでZenoh通信できます。したがって、この副作用は両方向から
+接続を開始できる対称なネットワークでは発生しません。本演習の `node_a` と
+`node_b` は相互に到達可能なので、ここでは既定動作の `always` を観察します。
 
 ## Zenoh公式資料
 
